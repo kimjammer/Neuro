@@ -6,3 +6,4 @@ class Signals:
     new_message = False
     tts_ready = False
     stt_ready = False
+    recentTwitchMessages = []

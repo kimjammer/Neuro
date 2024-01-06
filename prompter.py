@@ -22,8 +22,11 @@ class Prompter:
         # Prompt AI if human said something
         if self.signals.new_message:
             return True
+        # Prompt AI if there are unprocessed chat messages
+        if len(self.signals.recentTwitchMessages) > 0:
+            return True
         # Prompt if 15 seconds have passed without anyone talking
-        if self.timeSinceLastMessage > 15:
+        if self.timeSinceLastMessage > 60:
             return True
 
     def prompt_loop(self):

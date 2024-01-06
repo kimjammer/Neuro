@@ -10,7 +10,7 @@ from llmWrapper import LLMWrapper
 from stt import STT
 from tts import TTS
 from discordClient import DiscordClient
-from twitchClient import twitch_bot_run
+from twitchClient import TwitchClient
 
 if __name__ == '__main__':
     print("Starting Project...")
@@ -19,6 +19,7 @@ if __name__ == '__main__':
     # Register signal handler so that all threads can be exited.
     def signal_handler(sig, frame):
         print('Received CTRL + C, attempting to gracefully exit')
+        asyncio.run(twitchClient.shutdown())
         sys.exit(0)
 
 
@@ -39,6 +40,8 @@ if __name__ == '__main__':
 
     # Create Discord bot
     # discordClient = DiscordClient(signals, stt)
+    # Create Twitch bot
+    twitchClient = TwitchClient(signals)
 
     # Create threads (As daemons so they exit when the main thread exits)
     prompterThread = threading.Thread(target=prompter.prompt_loop, daemon=True)
@@ -49,7 +52,7 @@ if __name__ == '__main__':
     sttThread.start()
     # discordClient.run()
     # Start Twitch bot
-    asyncio.run(twitch_bot_run())
+    asyncio.run(twitchClient.start_twitch_bot())
 
     # Prevent main thread from exiting.
     input()

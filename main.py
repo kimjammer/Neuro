@@ -1,51 +1,55 @@
-import requests
-from RealtimeTTS import TextToAudioStream, CoquiEngine
-from RealtimeSTT import AudioToTextRecorder
-
-def process_text(text):
-    print(text)
-    user_message = text
-    history.append({"role": "user", "content": user_message})
-    data = {
-        "mode": "chat-instruct",
-        "character": "AI",
-        "messages": history
-    }
-    
-    response = requests.post(url, headers=headers, json=data, verify=False)
-    assistant_message = response.json()['choices'][0]['message']['content']
-    history.append({"role": "assistant", "content": assistant_message})
-    print(assistant_message)
-    stream.feed(assistant_message)
-    stream.play()
+# Python Module Imports
+import signal
+import sys
+import threading
+import asyncio
+# Class Imports
+from signals import Signals
+from prompter import Prompter
+from llmWrapper import LLMWrapper
+from stt import STT
+from tts import TTS
+from discordClient import DiscordClient
+from twitchClient import twitch_bot_run
 
 if __name__ == '__main__':
-    engine = CoquiEngine(
-        use_deepspeed=True,
-        voice="./voices/David_Attenborough CC3.wav"
-    )
-    stream = TextToAudioStream(engine)
-    
-    url = "http://127.0.0.1:5000/v1/chat/completions"
-    headers = {"Content-Type": "application/json"}
+    print("Starting Project...")
+
+
+    # Register signal handler so that all threads can be exited.
+    def signal_handler(sig, frame):
+        print('Received CTRL + C, attempting to gracefully exit')
+        sys.exit(0)
+
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # Singleton object that every module will be able to read/write to
+    signals = Signals()
     history = []
-    
-    recorder_config = {
-        'spinner': False,
-        'model': 'tiny.en',
-        'language': 'en',
-        'silero_sensitivity': 0.4,
-        'silero_use_onnx': True,
-        'webrtc_sensitivity': 2,
-        'post_speech_silence_duration': 0.4,
-        'min_length_of_recording': 0,
-        'min_gap_between_recordings': 0,
-        'enable_realtime_transcription': True,
-        'realtime_processing_pause': 0.2,
-        'realtime_model_type': 'tiny.en'
-    }
-    
-    
-    with AudioToTextRecorder(**recorder_config) as recorder:
-        while True:
-            recorder.text(process_text)
+
+    # Create STT
+    stt = STT(signals, history)
+    # Create TTS
+    tts = TTS(signals)
+    # Create LLMController
+    llmWrapper = LLMWrapper(signals, history, tts)
+    # Create Prompter
+    prompter = Prompter(signals, llmWrapper)
+
+    # Create Discord bot
+    # discordClient = DiscordClient(signals, stt)
+
+    # Create threads (As daemons so they exit when the main thread exits)
+    prompterThread = threading.Thread(target=prompter.prompt_loop, daemon=True)
+    sttThread = threading.Thread(target=stt.listen_loop, daemon=True)
+
+    # Start Threads
+    prompterThread.start()
+    sttThread.start()
+    # discordClient.run()
+    # Start Twitch bot
+    asyncio.run(twitch_bot_run())
+
+    # Prevent main thread from exiting.
+    input()

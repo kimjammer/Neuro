@@ -4,6 +4,8 @@ The goal of this project was to recreate Neuro-Sama, but only running on local m
 The original version was also created in only 7 days, so it is not exactly very sophisticated. Please expect this
 program to be somewhat jank.
 
+![Screenshot of demo stream](./images/stream.png)
+
 ## Architecture
 
 ### LLM

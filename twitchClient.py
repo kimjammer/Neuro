@@ -5,7 +5,6 @@ from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand
 import os
 from dotenv import load_dotenv
 
-
 class TwitchClient:
     signals = None
     chat = None

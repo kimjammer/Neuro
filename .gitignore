@@ -6,3 +6,4 @@ deepspeed-0.11.2+cuda118-cp310-cp310-win_amd64.whl
 __pycache__/
 .env
 realtimesst.log
+.idea/

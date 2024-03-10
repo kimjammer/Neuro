@@ -51,6 +51,14 @@ integration, but receiving voice data from discord is unsupported by discord and
 is an unused file that would have been for receiving voice data from discord. main.py simply creates all class instances
 and starts relevant threads/functions.
 
+### Frontend Integration
+
+This project uses python-socket.io to communicate with the control panel frontend. By default, the socket.io server is
+started on port 8080. I chose socket.io as sometimes the server needs to push data to the client (streaming LLM
+output, etc), and sometimes the client needs to send data to the server (blacklist updates, etc). In theory this could
+have been done with just websockets, but I was familiar with socket.io already. The frontend, written on sveltekit using
+shadcn-svelte, is available in its own repository.
+
 ## Requirements
 
 To fully recreate the author's exact setup, an Nvidia GPU with at least 12GB of VRAM is required. However, by altering

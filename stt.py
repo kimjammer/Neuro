@@ -1,18 +1,22 @@
 import logging
+import asyncio
 import time
 from RealtimeSTT import AudioToTextRecorder
 
 
 class STT:
-    signals = None
-    history = None
-    recorder = None
-
-    def __init__(self, signals, history):
+    def __init__(self, signals, history, sioServer):
+        self.recorder = None
         self.signals = signals
         self.history = history
+        self.sioServer = sioServer
+        self.API = self.API(self)
+        self.enabled = True
 
     def process_text(self, text):
+        if not self.enabled:
+            return
+
         print("STT OUTPUT: " + text)
         self.history.append({"role": "user", "content": text})
 
@@ -37,12 +41,11 @@ class STT:
             'model': 'tiny.en',
             'language': 'en',
             'use_microphone': True,
-            'silero_sensitivity': 0.4,
+            'silero_sensitivity': 0.6,
             'silero_use_onnx': True,
-            'webrtc_sensitivity': 2,
-            'post_speech_silence_duration': 0.4,
+            'post_speech_silence_duration': 0.2,
             'min_length_of_recording': 0,
-            'min_gap_between_recordings': 0,
+            'min_gap_between_recordings': 0.2,
             'enable_realtime_transcription': True,
             'realtime_processing_pause': 0.2,
             'realtime_model_type': 'tiny.en',
@@ -56,4 +59,18 @@ class STT:
             print("STT Ready")
             self.signals.stt_ready = True
             while True:
+                if not self.enabled:
+                    time.sleep(0.1)
+                    continue
                 recorder.text(self.process_text)
+
+    class API:
+        def __init__(self, outer):
+            self.outer = outer
+
+        async def set_STT_status(self, status):
+            self.outer.enabled = True
+            await self.outer.sioServer.sio.emit('STT_status', status)
+
+        def get_STT_status(self):
+            return self.outer.enabled

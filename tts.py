@@ -2,13 +2,13 @@ import logging
 import time
 from RealtimeTTS import TextToAudioStream, CoquiEngine
 
-
 class TTS:
-    signals = None
-    stream = None
-
-    def __init__(self, signals):
+    def __init__(self, signals, sioServer):
+        self.stream = None
         self.signals = signals
+        self.sioServer = sioServer
+        self.API = self.API(self)
+        self.enabled = True
 
         engine = CoquiEngine(
             use_deepspeed=True,
@@ -25,8 +25,11 @@ class TTS:
         self.signals.tts_ready = True
 
     def play(self, message):
+        if not self.enabled:
+            return
+
         self.stream.feed(message)
-        self.stream.play_async()
+        self.stream.play()
 
     def stop(self):
         self.stream.stop()
@@ -39,3 +42,19 @@ class TTS:
         self.signals.last_message_time = time.time()
         self.signals.AI_speaking = False
         print("SIGNALS: AI Talking Stop")
+
+    class API:
+        def __init__(self, outer):
+            self.outer = outer
+
+        async def set_TTS_status(self, status):
+            self.outer.enabled = status
+            if not status:
+                self.outer.stop()
+            await self.outer.sioServer.sio.emit('TTS_status', status)
+
+        def get_TTS_status(self):
+            return self.outer.enabled
+
+        def abort_current(self):
+            self.outer.stop()

@@ -6,12 +6,12 @@ import os
 from dotenv import load_dotenv
 
 class TwitchClient:
-    signals = None
-    chat = None
-    twitch = None
-
     def __init__(self, signals):
         self.signals = signals
+        self.chat = None
+        self.twitch = None
+        self.API = self.API(self)
+        self.enabled = True
 
     async def shutdown(self):
         self.chat.stop()
@@ -24,6 +24,9 @@ class TwitchClient:
         USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
         TARGET_CHANNEL = 'lunasparkai'
 
+        # TODO: DEBUG DISABLE TWITCH BOT
+        return
+
         # this will be called when the event READY is triggered, which will be on bot start
         async def on_ready(ready_event: EventData):
             print('TWITCH: Bot is ready for work, joining channels')
@@ -34,11 +37,16 @@ class TwitchClient:
 
         # this will be called whenever a message in a channel was send by either the bot OR another user
         async def on_message(msg: ChatMessage):
+            if not self.enabled:
+                return
+
             print(f'in {msg.room.name}, {msg.user.name} said: {msg.text}')
             # Store the 10 most recent chat messages
             if len(self.signals.recentTwitchMessages) > 10:
                 self.signals.recentTwitchMessages.pop(0)
             self.signals.recentTwitchMessages.append(f"{msg.user.name} : {msg.text}")
+            # Set recentTwitchMessages to itself to trigger the setter (updates frontend)
+            self.signals.recentTwitchMessages = self.signals.recentTwitchMessages
 
         # this will be called whenever someone subscribes to a channel
         async def on_sub(sub: ChatSub):
@@ -81,3 +89,18 @@ class TwitchClient:
 
         # we are done with our setup, lets start this bot up!
         chat.start()
+
+    class API:
+        def __init__(self, outer):
+            self.outer = outer
+
+        async def set_twitch_status(self, status):
+            self.outer.enabled = status
+
+            # If chat was disabled, clear recentTwitchMessages
+            if not status:
+                self.outer.signals.recentTwitchMessages = []
+            await self.outer.signals.sioServer.sio.emit('twitch_status', status)
+
+        def get_twitch_status(self):
+            return self.outer.enabled

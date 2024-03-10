@@ -1,16 +1,15 @@
+import asyncio
 import time
-
+from constants import PATIENCE
 
 class Prompter:
-    signals = None
-    llmWrapper = None
-
-    system_ready = False
-    timeSinceLastMessage = 0.0
-
-    def __init__(self, signals, llmWrapper):
+    def __init__(self, signals, llmWrapper, sioServer):
         self.signals = signals
         self.llmWrapper = llmWrapper
+        self.sioServer = sioServer
+
+        self.system_ready = False
+        self.timeSinceLastMessage = 0.0
 
     def prompt_now(self):
         # Don't prompt AI if system isn't ready yet
@@ -25,11 +24,13 @@ class Prompter:
         # Prompt AI if there are unprocessed chat messages
         if len(self.signals.recentTwitchMessages) > 0:
             return True
-        # Prompt if 15 seconds have passed without anyone talking
-        if self.timeSinceLastMessage > 60:
+        # Prompt if some amount of seconds have passed without anyone talking
+        if self.timeSinceLastMessage > PATIENCE:
             return True
 
     def prompt_loop(self):
+        print("Prompter loop started")
+
         while True:
             # Set lastMessageTime to now if program is still starting
             if self.signals.last_message_time == 0.0 or (not self.signals.stt_ready or not self.signals.tts_ready):
@@ -42,11 +43,13 @@ class Prompter:
 
             # Calculate and set time since last message
             self.timeSinceLastMessage = time.time() - self.signals.last_message_time
+            self.sioServer.emit("patience_update", {"crr_time": self.timeSinceLastMessage, "total_time": PATIENCE})
 
             # Decide and prompt LLM
             if self.prompt_now():
                 print("PROMPTING AI")
                 self.llmWrapper.prompt()
+                self.signals.last_message_time = time.time()
 
             # Sleep for 0.1 seconds before checking again.
             time.sleep(0.1)

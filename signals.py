@@ -1,6 +1,9 @@
 import asyncio
+import queue
+
+
 class Signals:
-    def __init__(self, sioServer):
+    def __init__(self):
         self._human_speaking = False
         self._AI_speaking = False
         self._AI_thinking = False
@@ -9,8 +12,9 @@ class Signals:
         self._tts_ready = False
         self._stt_ready = False
         self._recentTwitchMessages = []
+        self._history = []
 
-        self.sioServer = sioServer
+        self.sio_queue = queue.SimpleQueue()
 
     @property
     def human_speaking(self):
@@ -19,7 +23,7 @@ class Signals:
     @human_speaking.setter
     def human_speaking(self, value):
         self._human_speaking = value
-        self.sioServer.emit('human_speaking', value)
+        self.sio_queue.put(('human_speaking', value))
 
     @property
     def AI_speaking(self):
@@ -28,7 +32,7 @@ class Signals:
     @AI_speaking.setter
     def AI_speaking(self, value):
         self._AI_speaking = value
-        self.sioServer.emit('AI_speaking', value)
+        self.sio_queue.put(('AI_speaking', value))
 
     @property
     def AI_thinking(self):
@@ -37,7 +41,7 @@ class Signals:
     @AI_thinking.setter
     def AI_thinking(self, value):
         self._AI_thinking = value
-        self.sioServer.emit('AI_thinking', value)
+        self.sio_queue.put(('AI_thinking', value))
 
     @property
     def last_message_time(self):
@@ -78,4 +82,12 @@ class Signals:
     @recentTwitchMessages.setter
     def recentTwitchMessages(self, value):
         self._recentTwitchMessages = value
-        self.sioServer.emit('recent_twitch_messages', value)
+        self.sio_queue.put(('recentTwitchMessages', value))
+
+    @property
+    def history(self):
+        return self._history
+
+    @history.setter
+    def history(self, value):
+        self._history = value

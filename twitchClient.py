@@ -3,6 +3,7 @@ from twitchAPI.oauth import UserAuthenticator
 from twitchAPI.type import AuthScope, ChatEvent
 from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand
 import os
+import asyncio
 from dotenv import load_dotenv
 
 class TwitchClient:
@@ -12,10 +13,12 @@ class TwitchClient:
         self.twitch = None
         self.API = self.API(self)
         self.enabled = True
+        self.terminate = False
 
-    async def shutdown(self):
-        self.chat.stop()
-        await self.twitch.close()
+        self.loop = None
+
+    def init_event_loop(self):
+        asyncio.run(self.start_twitch_bot())
 
     async def start_twitch_bot(self):
         load_dotenv()
@@ -90,17 +93,26 @@ class TwitchClient:
         # we are done with our setup, lets start this bot up!
         chat.start()
 
+        while True:
+            if self.terminate:
+                self.chat.stop()
+                await self.twitch.close()
+            await asyncio.sleep(0.1)
+
     class API:
         def __init__(self, outer):
             self.outer = outer
 
-        async def set_twitch_status(self, status):
+        def set_twitch_status(self, status):
             self.outer.enabled = status
 
             # If chat was disabled, clear recentTwitchMessages
             if not status:
                 self.outer.signals.recentTwitchMessages = []
-            await self.outer.signals.sioServer.sio.emit('twitch_status', status)
+            self.outer.signals.sio_queue.put(('twitch_status', status))
 
         def get_twitch_status(self):
             return self.outer.enabled
+
+        def terminate(self):
+            self.outer.terminate = True

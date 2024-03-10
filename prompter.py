@@ -3,10 +3,9 @@ import time
 from constants import PATIENCE
 
 class Prompter:
-    def __init__(self, signals, llmWrapper, sioServer):
+    def __init__(self, signals, llmWrapper):
         self.signals = signals
         self.llmWrapper = llmWrapper
-        self.sioServer = sioServer
 
         self.system_ready = False
         self.timeSinceLastMessage = 0.0
@@ -43,7 +42,7 @@ class Prompter:
 
             # Calculate and set time since last message
             self.timeSinceLastMessage = time.time() - self.signals.last_message_time
-            self.sioServer.emit("patience_update", {"crr_time": self.timeSinceLastMessage, "total_time": PATIENCE})
+            self.signals.sio_queue.put(("patience_update", {"crr_time": self.timeSinceLastMessage, "total_time": PATIENCE}))
 
             # Decide and prompt LLM
             if self.prompt_now():
@@ -53,4 +52,3 @@ class Prompter:
 
             # Sleep for 0.1 seconds before checking again.
             time.sleep(0.1)
-            # time.sleep(1)

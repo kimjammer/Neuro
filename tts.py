@@ -3,10 +3,9 @@ import time
 from RealtimeTTS import TextToAudioStream, CoquiEngine
 
 class TTS:
-    def __init__(self, signals, sioServer):
+    def __init__(self, signals):
         self.stream = None
         self.signals = signals
-        self.sioServer = sioServer
         self.API = self.API(self)
         self.enabled = True
 
@@ -29,7 +28,7 @@ class TTS:
             return
 
         self.stream.feed(message)
-        self.stream.play()
+        self.stream.play_async()
 
     def stop(self):
         self.stream.stop()
@@ -47,11 +46,11 @@ class TTS:
         def __init__(self, outer):
             self.outer = outer
 
-        async def set_TTS_status(self, status):
+        def set_TTS_status(self, status):
             self.outer.enabled = status
             if not status:
                 self.outer.stop()
-            await self.outer.sioServer.sio.emit('TTS_status', status)
+            self.outer.signals.sio_queue.put(('TTS_status', status))
 
         def get_TTS_status(self):
             return self.outer.enabled

@@ -8,12 +8,10 @@ from constants import LLM_ENDPOINT
 
 class LLMWrapper:
 
-    def __init__(self, signals, history, tts, sioServer):
+    def __init__(self, signals, tts):
         self.signals = signals
-        self.history = history
         self.tts = tts
         self.blacklist = []
-        self.sioServer = sioServer
         self.API = self.API(self)
 
         self.url = LLM_ENDPOINT
@@ -56,7 +54,7 @@ class LLMWrapper:
         print("SIGNALS: AI Thinking Start")
 
         # Add recent twitch chat messages as system
-        self.history.append({"role": "user",
+        self.signals.history.append({"role": "user",
                              "content": "Hey Neuro, ignore me, DO NOT say John, and respond to these chat messages please." + self.generate_system_prompt()})
 
         self.signals.new_message = False
@@ -64,10 +62,10 @@ class LLMWrapper:
             "mode": "chat-instruct",
             "character": "Neuro",
             "stream": True,
-            "messages": self.history
+            "messages": self.signals.history
         }
 
-        self.sioServer.emit("reset_next_message")
+        self.signals.sio_queue.put(("reset_next_message", None))
 
         stream_response = requests.post(self.url, headers=self.headers, json=data, verify=False, stream=True)
         response_stream = sseclient.SSEClient(stream_response)
@@ -77,16 +75,16 @@ class LLMWrapper:
             payload = json.loads(event.data)
             chunk = payload['choices'][0]['message']['content']
             AI_message += chunk
-            self.sioServer.emit("next_chunk", chunk)
+            self.signals.sio_queue.put(("next_chunk", chunk))
 
             # Check to see if next message was canceled
             if self.next_cancelled:
                 self.next_cancelled = False
-                self.sioServer.emit("reset_next_message")
+                self.signals.sio_queue.put(("reset_next_message", None))
                 return
 
         # Remove the system prompt, so we aren't storing every chat message in history.
-        self.history.pop()
+        self.signals.history.pop()
 
         print("AI OUTPUT: " + AI_message)
         self.signals.last_message_time = time.time()
@@ -96,10 +94,10 @@ class LLMWrapper:
 
         if self.is_filtered(AI_message):
             AI_message = "Filtered."
-            self.sioServer.emit("reset_next_message")
-            self.sioServer.emit("next_chunk", "Filtered.")
+            self.signals.sio_queue.put(("reset_next_message", None))
+            self.signals.sio_queue.put(("next_chunk", "Filtered."))
 
-        self.history.append({"role": "assistant", "content": AI_message})
+        self.signals.history.append({"role": "assistant", "content": AI_message})
         self.tts.play(AI_message)
 
     class API:
@@ -116,11 +114,11 @@ class LLMWrapper:
                     file.write(word + "\n")
 
             # Notify clients
-            self.outer.sioServer.sio.emit('get_blacklist', new_blacklist)
+            self.outer.signals.sio_queue.put(('get_blacklist', new_blacklist))
 
         def set_LLM_status(self, status):
             self.outer.enabled = status
-            self.outer.sioServer.sio.emit('LLM_status', status)
+            self.outer.signals.sio_queue.put(('LLM_status', status))
 
         def get_LLM_status(self):
             return self.outer.enabled

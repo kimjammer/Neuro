@@ -5,11 +5,9 @@ from RealtimeSTT import AudioToTextRecorder
 
 
 class STT:
-    def __init__(self, signals, history, sioServer):
+    def __init__(self, signals):
         self.recorder = None
         self.signals = signals
-        self.history = history
-        self.sioServer = sioServer
         self.API = self.API(self)
         self.enabled = True
 
@@ -18,7 +16,7 @@ class STT:
             return
 
         print("STT OUTPUT: " + text)
-        self.history.append({"role": "user", "content": text})
+        self.signals.history.append({"role": "user", "content": text})
 
         self.signals.last_message_time = time.time()
         self.signals.new_message = True
@@ -36,6 +34,7 @@ class STT:
         self.recorder.feed_audio(data)
 
     def listen_loop(self):
+        print("STT Starting")
         recorder_config = {
             'spinner': False,
             'model': 'tiny.en',
@@ -60,7 +59,6 @@ class STT:
             self.signals.stt_ready = True
             while True:
                 if not self.enabled:
-                    time.sleep(0.1)
                     continue
                 recorder.text(self.process_text)
 
@@ -68,9 +66,9 @@ class STT:
         def __init__(self, outer):
             self.outer = outer
 
-        async def set_STT_status(self, status):
+        def set_STT_status(self, status):
             self.outer.enabled = True
-            await self.outer.sioServer.sio.emit('STT_status', status)
+            self.outer.signals.sio_queue.put(('STT_status', status))
 
         def get_STT_status(self):
             return self.outer.enabled

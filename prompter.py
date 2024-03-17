@@ -30,7 +30,7 @@ class Prompter:
     def prompt_loop(self):
         print("Prompter loop started")
 
-        while True:
+        while not self.signals.terminate:
             # Set lastMessageTime to now if program is still starting
             if self.signals.last_message_time == 0.0 or (not self.signals.stt_ready or not self.signals.tts_ready):
                 self.signals.last_message_time = time.time()

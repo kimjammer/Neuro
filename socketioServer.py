@@ -2,6 +2,8 @@ import asyncio
 import time
 from aiohttp import web
 import socketio
+from aiohttp.web_runner import GracefulExit
+
 from constants import PATIENCE
 
 
@@ -81,6 +83,16 @@ class SocketIOServer:
         async def abort_current_message(sid):
             self.tts.API.abort_current()
 
+        @sio.event
+        async def fun_fact(sid):
+            self.signals.history.append({"role": "user", "content": "Let's move on. Can we get a fun fact?"})
+            self.signals.new_message = True
+
+        @sio.event
+        async def new_topic(sid, message):
+            self.signals.history.append({"role": "user", "content": message})
+            self.signals.new_message = True
+
         # When a new client connects, send them the status of everything
         @sio.event
         async def connect(sid, environ):
@@ -103,6 +115,9 @@ class SocketIOServer:
 
         async def send_messages():
             while True:
+                if self.signals.terminate:
+                    raise GracefulExit
+
                 while not self.signals.sio_queue.empty():
                     event, data = self.signals.sio_queue.get()
                     #print(f"Sending {event} with {data}")

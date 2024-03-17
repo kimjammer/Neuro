@@ -20,14 +20,11 @@ class STT:
 
         self.signals.last_message_time = time.time()
         self.signals.new_message = True
-        print("SIGNALS: New Message")
 
     def recording_start(self):
-        print("SIGNALS: Human Talking Start")
         self.signals.human_speaking = True
 
     def recording_stop(self):
-        print("SIGNALS: Human Talking Stop")
         self.signals.human_speaking = False
 
     def feed_audio(self, data):
@@ -57,7 +54,7 @@ class STT:
             self.recorder = recorder
             print("STT Ready")
             self.signals.stt_ready = True
-            while True:
+            while not self.signals.terminate:
                 if not self.enabled:
                     continue
                 recorder.text(self.process_text)
@@ -72,3 +69,8 @@ class STT:
 
         def get_STT_status(self):
             return self.outer.enabled
+
+        def shutdown(self):
+            self.outer.recorder.stop()
+            self.outer.recorder.interrupt_stop_event.set()
+            # self.outer.recorder.shutdown()

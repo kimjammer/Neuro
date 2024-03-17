@@ -111,6 +111,9 @@ installed (If you have a venv called venv it would be ./venv/Lib/site-packages/R
 and modify the last line of the open_stream() function where self.pyaudio_instance.open() is called. Add ",
 output_device_index=SPEAKERNUMBER" to the parameters of the .open() call. Save.
 
+Patch: In the RealtimeTTS library, CoquiEngine's output_worker_thread isn't daemonized, so th thread doesn't exit,
+preventing the program from exiting. It has been monkeypatched, see kimjammer/RealtimeTTS, until/if the fix is merged.
+
 ## Running
 
 Start text-generation-webui, go to the Parameters tab, then the Characters subtab, and create your own charcter. See

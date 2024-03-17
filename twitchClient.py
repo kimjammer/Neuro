@@ -5,6 +5,7 @@ from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand
 import os
 import asyncio
 from dotenv import load_dotenv
+from constants import TWITCH_CHANNEL, TWITCH_MAX_MESSAGE_LENGTH
 
 class TwitchClient:
     def __init__(self, signals):
@@ -13,7 +14,6 @@ class TwitchClient:
         self.twitch = None
         self.API = self.API(self)
         self.enabled = True
-        self.terminate = False
 
         self.loop = None
 
@@ -25,7 +25,6 @@ class TwitchClient:
         APP_ID = os.getenv("TWITCH_APP_ID")
         APP_SECRET = os.getenv("TWITCH_SECRET")
         USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
-        TARGET_CHANNEL = 'lunasparkai'
 
         # TODO: DEBUG DISABLE TWITCH BOT
         return
@@ -35,7 +34,7 @@ class TwitchClient:
             print('TWITCH: Bot is ready for work, joining channels')
             # join our target channel, if you want to join multiple, either call join for each individually
             # or even better pass a list of channels as the argument
-            await ready_event.chat.join_room(TARGET_CHANNEL)
+            await ready_event.chat.join_room(TWITCH_CHANNEL)
             # you can do other bot initialization things in here
 
         # this will be called whenever a message in a channel was send by either the bot OR another user
@@ -43,11 +42,15 @@ class TwitchClient:
             if not self.enabled:
                 return
 
+            if len(msg.text) > TWITCH_MAX_MESSAGE_LENGTH:
+                return
+
             print(f'in {msg.room.name}, {msg.user.name} said: {msg.text}')
             # Store the 10 most recent chat messages
             if len(self.signals.recentTwitchMessages) > 10:
                 self.signals.recentTwitchMessages.pop(0)
             self.signals.recentTwitchMessages.append(f"{msg.user.name} : {msg.text}")
+
             # Set recentTwitchMessages to itself to trigger the setter (updates frontend)
             self.signals.recentTwitchMessages = self.signals.recentTwitchMessages
 
@@ -94,9 +97,11 @@ class TwitchClient:
         chat.start()
 
         while True:
-            if self.terminate:
+            if self.signals.terminate:
                 self.chat.stop()
                 await self.twitch.close()
+                return
+
             await asyncio.sleep(0.1)
 
     class API:
@@ -113,6 +118,3 @@ class TwitchClient:
 
         def get_twitch_status(self):
             return self.outer.enabled
-
-        def terminate(self):
-            self.outer.terminate = True

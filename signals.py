@@ -14,6 +14,9 @@ class Signals:
         self._recentTwitchMessages = []
         self._history = []
 
+        # This flag indicates to all threads that they should immediately terminate
+        self._terminate = False
+
         self.sio_queue = queue.SimpleQueue()
 
     @property
@@ -24,6 +27,10 @@ class Signals:
     def human_speaking(self, value):
         self._human_speaking = value
         self.sio_queue.put(('human_speaking', value))
+        if value:
+            print("SIGNALS: Human Talking Start")
+        else:
+            print("SIGNALS: Human Talking Stop")
 
     @property
     def AI_speaking(self):
@@ -33,6 +40,10 @@ class Signals:
     def AI_speaking(self, value):
         self._AI_speaking = value
         self.sio_queue.put(('AI_speaking', value))
+        if value:
+            print("SIGNALS: AI Talking Start")
+        else:
+            print("SIGNALS: AI Talking Stop")
 
     @property
     def AI_thinking(self):
@@ -42,6 +53,10 @@ class Signals:
     def AI_thinking(self, value):
         self._AI_thinking = value
         self.sio_queue.put(('AI_thinking', value))
+        if value:
+            print("SIGNALS: AI Thinking Start")
+        else:
+            print("SIGNALS: AI Thinking Stop")
 
     @property
     def last_message_time(self):
@@ -58,6 +73,8 @@ class Signals:
     @new_message.setter
     def new_message(self, value):
         self._new_message = value
+        if value:
+            print("SIGNALS: New Message")
 
     @property
     def tts_ready(self):
@@ -91,3 +108,11 @@ class Signals:
     @history.setter
     def history(self, value):
         self._history = value
+
+    @property
+    def terminate(self):
+        return self._terminate
+
+    @terminate.setter
+    def terminate(self, value):
+        self._terminate = value

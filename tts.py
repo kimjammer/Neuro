@@ -27,6 +27,11 @@ class TTS:
         if not self.enabled:
             return
 
+        # If the message is only whitespace, don't attempt to play it
+        if not message.strip():
+            return
+
+        self.signals.sio_queue.put(("current_message", message))
         self.stream.feed(message)
         self.stream.play_async()
 
@@ -35,12 +40,10 @@ class TTS:
 
     def audio_started(self):
         self.signals.AI_speaking = True
-        print("SIGNALS: AI Talking Start")
 
     def audio_ended(self):
         self.signals.last_message_time = time.time()
         self.signals.AI_speaking = False
-        print("SIGNALS: AI Talking Stop")
 
     class API:
         def __init__(self, outer):

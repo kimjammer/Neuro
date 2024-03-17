@@ -21,10 +21,12 @@ async def main():
 
     # Register signal handler so that all threads can be exited.
     def signal_handler(sig, frame):
-        print('Received CTRL + C, attempting to gracefully exit')
-        #twitchClient.API.terminate()
-        sys.exit(0)
+        print('Received CTRL + C, attempting to gracefully exit. Close all dashboard windows to speed up shutdown.')
+        signals.terminate = True
+        stt.API.shutdown()
+
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     # Singleton object that every module will be able to read/write to
     signals = Signals()
@@ -60,8 +62,22 @@ async def main():
     # Start Twitch bot
     twitch_thread.start()
 
-    # Prevent main thread from exiting.
-    input()
+    while not signals.terminate:
+        time.sleep(0.1)
+    print("TERMINATING ======================")
+
+    # Wait for child threads to exit before exiting main thread
+    sio_thread.join()
+    print("SIO EXITED ======================")
+    prompter_thread.join()
+    print("PROMPTER EXITED ======================")
+    #stt_thread.join()
+    #print("STT EXITED ======================")
+    # discord_thread.join()
+    twitch_thread.join()
+    print("TWITCH EXITED ======================")
+
+    sys.exit(0)
 
 if __name__ == '__main__':
     asyncio.run(main())

@@ -95,7 +95,7 @@ documentation [here](https://pytwitchapi.dev/en/stable/index.html#user-authentic
 
 ### This Project
 
-A virtual environment of some sort is reccommended (Python 3.10+(?)); this project was developed with venv.
+A virtual environment of some sort is recommended (Python 3.10+(?)); this project was developed with venv.
 
 Install requirements.txt
 
@@ -105,6 +105,11 @@ and using their [provided wheels](https://github.com/erew123/alltalk_tts/release
 
 Create an .env file using .env.example as reference. You need your Twitch app id and secret.
 
+Configure constants.py. Most important: choose your API mode. Using chat mode uses the chat endpoint, and completions
+will use the completions endpoint which is deprecated in most LLM APIs but gives more control over the exact prompt.
+If you are using oobabooga/text-generation-webui, using the completions mode works as of writing, but for other services
+you may need to switch to chat mode.
+
 **Optional:** To output the tts to a specific audio device, first run the utils/listAudioDevices.py script, and find the
 speaker that you want (ex: Virtual Audio Cable Input) and note its number. Next, navigate to where RealtimeTTS is
 installed (If you have a venv called venv it would be ./venv/Lib/site-packages/RealtimeTTS), open stream_player.py,
@@ -112,7 +117,7 @@ and modify the last line of the open_stream() function where self.pyaudio_instan
 output_device_index=SPEAKERNUMBER" to the parameters of the .open() call. Save.
 
 Patch: In the RealtimeTTS library, CoquiEngine's output_worker_thread isn't daemonized, so th thread doesn't exit,
-preventing the program from exiting. It has been monkeypatched, see kimjammer/RealtimeTTS, until/if the fix is merged.
+preventing the program from exiting. The fix has been merged, but not released as a new version yet - see kimjammer/RealtimeTTS.
 
 ## Running
 

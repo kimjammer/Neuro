@@ -57,7 +57,7 @@ This project uses python-socket.io to communicate with the control panel fronten
 started on port 8080. I chose socket.io as sometimes the server needs to push data to the client (streaming LLM
 output, etc), and sometimes the client needs to send data to the server (blacklist updates, etc). In theory this could
 have been done with just websockets, but I was familiar with socket.io already. The frontend, written on sveltekit using
-shadcn-svelte, is available in its own repository.
+shadcn-svelte, is available in its own repository, [kimjammer/neurofrontend](https://github.com/kimjammer/neurofrontend).
 
 ## Requirements
 

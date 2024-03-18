@@ -36,14 +36,14 @@ class LLMWrapper:
 
     def generate_twitch_section(self):
         if len(self.signals.recentTwitchMessages) > 0:
-            output = "These are recent twitch messages:\n"
+            output = "\nThese are recent twitch messages:\n"
             for message in self.signals.recentTwitchMessages:
                 output += message + "\n"
 
             # Clear out handled twitch messages
             self.signals.recentTwitchMessages = []
 
-            output += "Pick the highest quality message with the most potential for an interesting answer and respond to them."
+            output += "Pick the highest quality message with the most potential for an interesting answer and respond to them.\n"
             print(output)
             return output
         else:
@@ -150,6 +150,10 @@ class LLMWrapper:
 
         AI_message = ''
         for event in response_stream.events():
+            # Check to see if next message was canceled
+            if self.next_cancelled:
+                continue
+
             payload = json.loads(event.data)
             chunk = ''
             if API_MODE == "chat":
@@ -159,11 +163,11 @@ class LLMWrapper:
             AI_message += chunk
             self.signals.sio_queue.put(("next_chunk", chunk))
 
-            # Check to see if next message was canceled
-            if self.next_cancelled:
-                self.next_cancelled = False
-                self.signals.sio_queue.put(("reset_next_message", None))
-                return
+        if self.next_cancelled:
+            self.next_cancelled = False
+            self.signals.sio_queue.put(("reset_next_message", None))
+            self.signals.AI_thinking = False
+            return
 
         if API_MODE == "chat":
             # Remove the system prompt, so we aren't storing every chat message in history.
@@ -200,6 +204,8 @@ class LLMWrapper:
 
         def set_LLM_status(self, status):
             self.outer.enabled = status
+            if status:
+                self.outer.signals.AI_thinking = False
             self.outer.signals.sio_queue.put(('LLM_status', status))
 
         def get_LLM_status(self):

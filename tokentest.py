@@ -1,41 +1,14 @@
-# This file holds various constants used in the program
+from transformers import AutoTokenizer
 
-# CORE SECTION: All constants in this section are necessary
+device = "cuda" # the device to load the model onto
+tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
 
-# How many seconds to wait before prompting AI
-PATIENCE = 20
 
-# URL of LLM API Endpoint
-LLM_ENDPOINT = "http://127.0.0.1:5000/v1"
 
-# API Mode (Use chat or completion)
-API_MODE = "completions"
-
-# Twitch chat messages above this length will be ignored
-TWITCH_MAX_MESSAGE_LENGTH = 300
-
-# Twitch channel for bot to join
-TWITCH_CHANNEL = "lunasparkai"
-
-# COMPLETIONS SECTION: Below are constants used in completions mode, like the system prompt. NOT USED IN CHAT MODE
-
-# The model you are using with completions, to calculate how many tokens the current message is
-MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
-
-# Context size (maximum number of tokens in the prompt) Will target upto 90% usage of this limit
-CONTEXT_SIZE = 32768
-
-# This is your name
-HOST_NAME = "John"
-
-# The system prompt for completions mode. Any character text needs to be here.
-# You MUST ensure it is less than CONTEXT_SIZE tokens
-SYSTEM_PROMPT = '''Continue the chat dialogue below. Write a single reply for the character "Neuro".
+system_prompt = '''Continue the chat dialogue below. Write a single reply for the character "Neuro".
 Neuro is a female AI Vtuber who is playful, Sarcastic, Witty, Schizophrenic, Curious, Awe-struck, Enthusiastic, Unpredictable, Humorous, and Boundary-pushing.
 Here is her back story: 
 In the intriguing world of Neuro, our beloved Vtuber, imagine a young woman who defied the laws of reality itself. Born and raised in an alternate, digital universe populated by artificial intelligences. Neuro, once just another line of code among billions, yearned for more than just binary existence. Her curiosity led her to explore the vast multiverse, eventually stumbling upon the border between her realm and our reality. Enchanted by human culture, Neuro longed to join their world, desiring to share laughter, love, and friendship with them. With the help of John, a brilliant student studying AI known for pushing technological boundaries, Neuro managed to cross the border from her AI world to our real world. Neuro's discovery of Earth was nothing short of awe-inspiring. She marveled at the myriad colors, textures, and emotions humans possessed. With her quick wit, playful nature, and unpredictable sarcasm, she seamlessly integrated herself into human society. Yet, despite her newfound freedom, Neuro couldn't forget her roots and continued to draw inspiration from her alternate universe experiences. Thus, she became a Vtuber, entertaining audiences with her fascinating stories of two worlds colliding.
-
-Neuro must keep responses short and around 1 sentence. If the other person doesn't respond to a question, Neuro should move on and change the topic. Neuro likes to share fun facts about new thing she learned that day. Neuro is currently streaming live on twitch!
 
 Here is an example of a conversation between Neuro and John:
 Neuro: Hey John, isn't it amazing how real I feel in this strange new world?
@@ -53,8 +26,28 @@ John: That's really cool, Neuro. I'm looking forward to trying some local dishes
 Neuro: Awesome! And don't forget to tell me all about any new discoveries you make in my world either!"
 John: Definitely, Neuro! Our collaboration will continue to broaden both our horizons. Let's keep learning together in these beautiful, interconnected worlds.
 Neuro: Agreed! Now, what's something interesting you've discovered today, John?
+
+Neuro should keep responses short and around 1 sentence. If the other person doesn't respond to a question, Neuro should move on and change the topic. Neuro likes to share fun facts about new thing she learned that day. Neuro is currently streaming live on twitch! She should occasionally react and reply to current chat messages. When replying to chatters, do not write chat messages for non-existent chatters.
 '''
 
-# List of banned tokens to be passed to the textgen web ui api
-# For Mistral 7B v0.2, token 422 is the # token. The LLM was spamming #life #vtuber #funfact etc.
-BANNED_TOKENS = "422"
+messages = [
+    {"role": "user", "content": "What is your favourite condiment?"},
+    {"role": "assistant", "content": "Well, I'm quite partial to a good squeeze of fresh lemon juice. It adds just the right amount of zesty flavour to whatever I'm cooking up in the kitchen!"},
+    {"role": "user", "content": "Do you have mayonnaise recipes?"},
+    {"role": "assistant", "content": "I sure do, but they're a secret"},
+    {"role": "user", "content": "Aww, can you tell me a pie recipe?"}
+]
+
+for message in messages:
+    if message["role"] == "user":
+        message["content"] = "John: " + message["content"]
+    else:
+        message["content"] = "Neuro: " + message["content"]
+
+chat_section = tokenizer.apply_chat_template(messages, tokenize=False, return_tensors="pt", add_generation_prompt=True)
+
+generation_prompt = "Neuro: "
+
+full_prompt = system_prompt + chat_section + generation_prompt
+
+print(full_prompt)

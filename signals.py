@@ -99,7 +99,7 @@ class Signals:
     @recentTwitchMessages.setter
     def recentTwitchMessages(self, value):
         self._recentTwitchMessages = value
-        self.sio_queue.put(('recentTwitchMessages', value))
+        self.sio_queue.put(('recent_twitch_messages', value))
 
     @property
     def history(self):

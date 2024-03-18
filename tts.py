@@ -11,7 +11,7 @@ class TTS:
 
         engine = CoquiEngine(
             use_deepspeed=True,
-            voice="./voices/calvinSelected.wav",
+            voice="./voices/neuro.wav",
             speed=1.1,
             level=logging.ERROR
         )

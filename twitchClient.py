@@ -26,9 +26,6 @@ class TwitchClient:
         APP_SECRET = os.getenv("TWITCH_SECRET")
         USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
 
-        # TODO: DEBUG DISABLE TWITCH BOT
-        return
-
         # this will be called when the event READY is triggered, which will be on bot start
         async def on_ready(ready_event: EventData):
             print('TWITCH: Bot is ready for work, joining channels')

@@ -2,11 +2,16 @@
 
 # CORE SECTION: All constants in this section are necessary
 
+# Use utils/listAudioDevices.py to find the correct device ID
+INPUT_DEVICE_INDEX = 1
+OUTPUT_DEVICE_INDEX = 12
+
 # How many seconds to wait before prompting AI
 PATIENCE = 20
 
 # URL of LLM API Endpoint
 LLM_ENDPOINT = "http://127.0.0.1:5000/v1"
+# LLM_ENDPOINT = ""
 
 # API Mode (Use chat or completion)
 API_MODE = "completions"
@@ -21,12 +26,16 @@ TWITCH_CHANNEL = "lunasparkai"
 
 # The model you are using with completions, to calculate how many tokens the current message is
 MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
+# MODEL = "Weyaxi/SauerkrautLM-UNA-SOLAR-Instruct"
 
 # Context size (maximum number of tokens in the prompt) Will target upto 90% usage of this limit
 CONTEXT_SIZE = 32768
 
 # This is your name
 HOST_NAME = "John"
+
+# This is the AI's name
+AI_NAME = "Neuro"
 
 # The system prompt for completions mode. Any character text needs to be here.
 # You MUST ensure it is less than CONTEXT_SIZE tokens
@@ -56,5 +65,5 @@ Neuro: Agreed! Now, what's something interesting you've discovered today, John?
 '''
 
 # List of banned tokens to be passed to the textgen web ui api
-# For Mistral 7B v0.2, token 422 is the # token. The LLM was spamming #life #vtuber #funfact etc.
+# For Mistral 7B v0.2, token 422 is the "#" token. The LLM was spamming #life #vtuber #funfact etc.
 BANNED_TOKENS = "422"

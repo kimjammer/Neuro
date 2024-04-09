@@ -1,5 +1,4 @@
 import io
-from pydub import AudioSegment
 from discord.sinks.core import Filters, Sink, default_filters, AudioData
 
 

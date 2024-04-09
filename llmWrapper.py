@@ -1,19 +1,21 @@
-import asyncio
 import requests
 import sseclient
 import json
 import time
-from constants import *
 from transformers import AutoTokenizer
+from constants import *
+from modules.injection import Injection
 
 
 class LLMWrapper:
 
-    def __init__(self, signals, tts):
+    def __init__(self, signals, tts, modules=None):
         self.signals = signals
         self.tts = tts
         self.blacklist = []
         self.API = self.API(self)
+        if modules is None:
+            self.modules = {}
 
         self.headers = {"Content-Type": "application/json"}
 
@@ -34,28 +36,13 @@ class LLMWrapper:
         else:
             return False
 
-    def generate_twitch_section(self):
-        if len(self.signals.recentTwitchMessages) > 0:
-            output = "\nThese are recent twitch messages:\n"
-            for message in self.signals.recentTwitchMessages:
-                output += message + "\n"
-
-            # Clear out handled twitch messages
-            self.signals.recentTwitchMessages = []
-
-            output += "Pick the highest quality message with the most potential for an interesting answer and respond to them.\n"
-            print(output)
-            return output
-        else:
-            return ""
-
-    # Ensure that the messages are in strict user, ai, user, ai order
+    # Ensure that the messages are in strict user, AI, user, AI order
     def fix_message_format(self, messages):
         fixed_messages = []
         user_msg = ""
         for entry in messages:
             if entry["role"] == "user":
-                # If 2 user messages are in a row, then add blank ai message
+                # If 2 user messages are in a row, then add blank AI message
                 if user_msg != "":
                     fixed_messages.append({"role": "user", "content": user_msg})
                     fixed_messages.append({"role": "assistant", "content": ""})
@@ -66,7 +53,7 @@ class LLMWrapper:
                     fixed_messages.append({"role": "assistant", "content": entry["content"]})
                     user_msg = ""
                 else:
-                    # If there is no user message before this ai message, add blank user message
+                    # If there is no user message before this AI message, add blank user message
                     fixed_messages.append({"role": "user", "content": ""})
                     fixed_messages.append({"role": "assistant", "content": entry["content"]})
         if user_msg != "":
@@ -78,31 +65,49 @@ class LLMWrapper:
 
         return fixed_messages
 
+    # Assembles all the injections from all modules into a single prompt by increasing priority
+    def assemble_prompt(self, injections=None):
+        if injections is None:
+            injections = []
+
+        # Gather all injections from all modules
+        for module in self.modules.values():
+            injections.append(module.get_prompt_injection())
+
+        # Sort injections by priority
+        injections = sorted(injections, key=lambda x: x.priority)
+
+        # Assemble injections
+        prompt = ""
+        for injection in injections:
+            prompt += injection.text
+        return prompt
+
     # This function is only used in completions mode
-    def generate_full_prompt(self):
+    def generate_completions_prompt(self):
         messages = self.fix_message_format(self.signals.history.copy())
-        twitch_section = self.generate_twitch_section()
 
         # For every message prefix with speaker name unless it is blank
         for message in messages:
             if message["role"] == "user" and message["content"] != "":
                 message["content"] = HOST_NAME + ": " + message["content"]
             elif message["role"] == "assistant" and message["content"] != "":
-                message["content"] = "Neuro: " + message["content"]
+                message["content"] = AI_NAME + ": " + message["content"]
 
         while True:
-            print(messages)
+            # print(messages)
             chat_section = self.tokenizer.apply_chat_template(messages, tokenize=False, return_tensors="pt", add_generation_prompt=True)
 
-            generation_prompt = "Neuro: "
+            generation_prompt = AI_NAME + ": "
 
-            full_prompt = SYSTEM_PROMPT + chat_section + twitch_section + generation_prompt
+            base_injections = [Injection(SYSTEM_PROMPT, 10), Injection(chat_section, 50)]
+            full_prompt = self.assemble_prompt(base_injections) + generation_prompt
             wrapper = [{"role": "user", "content": full_prompt}]
 
             # Find out roughly how many tokens the prompt is
             # Not 100% accurate, but it should be a good enough estimate
             prompt_tokens = len(self.tokenizer.apply_chat_template(wrapper, tokenize=True, return_tensors="pt")[0])
-            print(prompt_tokens)
+            # print(prompt_tokens)
 
             # Maximum 90% context size usage before prompting LLM
             if prompt_tokens < 0.9 * CONTEXT_SIZE:
@@ -110,6 +115,10 @@ class LLMWrapper:
                 print(full_prompt)
                 return full_prompt
             else:
+                # If the prompt is too long even with no messages, there's nothing we can do, crash
+                if len(messages) < 1:
+                    raise RuntimeError("Prompt too long even with no messages")
+
                 # Remove the oldest message from the prompt and try again
                 messages.pop(0)
                 print("Prompt too long, removing earliest message")
@@ -125,7 +134,7 @@ class LLMWrapper:
         if API_MODE == "chat":
             # Add recent twitch chat messages as system
             self.signals.history.append({"role": "user",
-                                         "content": "Hey Neuro, ignore me, DO NOT say John, and respond to these chat messages please." + self.generate_twitch_section()})
+                                         "content": "Hey Neuro, ignore me, and respond to these chat messages please." + self.modules['twitch'].get_prompt_injection()})
             data = {
                 "mode": "chat-instruct",
                 "character": "Neuro",
@@ -136,7 +145,7 @@ class LLMWrapper:
             response_stream = sseclient.SSEClient(stream_response)
         elif API_MODE == "completions":
             data = {
-                "prompt": self.generate_full_prompt(),
+                "prompt": self.generate_completions_prompt(),
                 "stream": True,
                 "max_tokens": 200,
                 "custom_token_bans": BANNED_TOKENS

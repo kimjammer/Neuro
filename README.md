@@ -15,14 +15,14 @@ running [Mistral 7B Instruct v0.2 GPTQ](https://huggingface.co/TheBloke/Mistral-
 ExLlamaV2_HF loader with cache_8bit turned on. The openai api extension must be turned on, as this is how we interact
 with the LLM. text-generation-webui and the LLM must be installed and started separately.
 
-Alternatively, you can load any other model into text-generation-webui or modify llmWrapper.py to point to any other
-openapi compatible endpoint.
+Alternatively, you can load any other model into text-generation-webui or modify constants.py to point to any other
+openapi compatible endpoint. Note that this project uses some parameters only on text-generation-webui.
 
 ### STT
 
 This project uses the excellent [KoljaB/RealtimeSTT](https://github.com/KoljaB/RealtimeSTT), which can transcribe an
 incoming audio stream, not just a file. This means that the text is transcribed as the person is talking, and so
-transcription ends almost immedeatly after speech ends. It is configured to use the faster_whisper tiny.en model.
+transcription ends almost immediately after speech ends. It is configured to use the faster_whisper tiny.en model.
 
 ### TTS
 
@@ -41,11 +41,20 @@ the Installation Section for more details.
 
 ### Modularization
 
-Each concern of the program is separated out into its own python file. A single signals object is created and passed to
-every module, and each module can read and write to the same signals object to share state and data. tts.py and stt.py
-handle the TTS and STT, the llmWrapper.py is responsible for interfacing with the LLM API, and prompter.py is
+Each concern of the program is separated out into its own python file/class. A single signals object is created and 
+passed to every class, and each class can read and write to the same signals object to share state and data. tts.py and 
+stt.py handle the TTS and STT, the llmWrapper.py is responsible for interfacing with the LLM API, and prompter.py is
 responsible for deciding when and how to prompt the LLM. prompter.py will take in several signals (ex: Human currently
 talking, AI thinking, new twitch chat messages, time since last message...) and decide to prompt the LLM.
+
+There are also modules which extend the functionality of the core program. Modules are found in the modules folder, and
+every functional module extends the Module class. Each module is run in its own thread with its own event loop, and will
+be provided with the signals object. Modules must implement the run() method, and can provide the get_prompt_injection()
+method which should return an Injection object. The Injection object is a simple data class that contains the text to
+be injected into the LLM prompt, and the priority of the injection. Injections are sorted from lowest to highest
+priority (Highest priority appears at end of prompt). When the signals.terminate flag is set, every module should clean
+up and self terminate.
+
 twitchClient.py handles the twitch integration and reading recent chat messages. There was an attempt made at discord
 integration, but receiving voice data from discord is unsupported by discord and proved unusably buggy. streamingSink.py
 is an unused file that would have been for receiving voice data from discord. main.py simply creates all class instances
@@ -68,11 +77,11 @@ This project was developed on:
 
 CPU: AMD Ryzen 7 7800X3D
 
-RAM: 32GB
+RAM: 32GB DDR5
 
 GPU: Nvidia GeForce RTX 4070
 
-Environment: Windows 11, Python 3.10.10
+Environment: Windows 11, Python 3.11.9
 
 ## Installation
 
@@ -84,7 +93,7 @@ installation details of the architecturally significant repositories listed abov
 Install [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui), and download an LLM model
 to use. I used [Mistral 7B Instruct v0.2 GPTQ](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GPTQ).
 
-Install Vtube Studio from steam. I used the default Hiyori model.
+Install Vtube Studio from Steam. I used the default Hiyori model.
 
 **Optional:** You may want to install a virtual audio cable like [this](https://vb-audio.com/Cable/) to feed the TTS
 output directly into Vtube Studio.
@@ -95,42 +104,37 @@ documentation [here](https://pytwitchapi.dev/en/stable/index.html#user-authentic
 
 ### This Project
 
-A virtual environment of some sort is recommended (Python 3.10+(?)); this project was developed with venv.
+A virtual environment of some sort is recommended (Python 3.11); this project was developed with venv.
 
 Install requirements.txt
 
 DeepSpeed will probably need to be installed separately, I was using instructions
-from [AllTalkTTS](https://github.com/erew123/alltalk_tts?#-deepspeed-installation-options) ,
-and using their [provided wheels](https://github.com/erew123/alltalk_tts/releases/tag/deepspeed).
+from [AllTalkTTS](https://github.com/erew123/alltalk_tts?#-deepspeed-installation-options) , and using their 
+[provided wheels](https://github.com/erew123/alltalk_tts/releases/tag/DeepSpeed-14.0).
 
 Create an .env file using .env.example as reference. You need your Twitch app id and secret.
 
 Configure constants.py. Most important: choose your API mode. Using chat mode uses the chat endpoint, and completions
 will use the completions endpoint which is deprecated in most LLM APIs but gives more control over the exact prompt.
-If you are using oobabooga/text-generation-webui, using the completions mode works as of writing, but for other services
-you may need to switch to chat mode.
+If you are using oobabooga/text-generation-webui, using the completions mode works is recommended, but for other 
+services you may need to switch to chat mode.
 
-**Optional:** To output the tts to a specific audio device, first run the utils/listAudioDevices.py script, and find the
-speaker that you want (ex: Virtual Audio Cable Input) and note its number. Next, navigate to where RealtimeTTS is
-installed (If you have a venv called venv it would be ./venv/Lib/site-packages/RealtimeTTS), open stream_player.py,
-and modify the last line of the open_stream() function where self.pyaudio_instance.open() is called. Add ",
-output_device_index=SPEAKERNUMBER" to the parameters of the .open() call. Save.
-
-Patch: In the RealtimeTTS library, CoquiEngine's output_worker_thread isn't daemonized, so th thread doesn't exit,
-preventing the program from exiting. The fix has been merged, but not released as a new version yet - see kimjammer/RealtimeTTS.
+To output the tts to a specific audio device, first run the utils/listAudioDevices.py script, and find the
+speaker that you want (ex: Virtual Audio Cable Input) and note its number. Configure constants.py to use your chosen
+microphone and speaker device.
 
 ## Running
 
-Start text-generation-webui, go to the Parameters tab, then the Characters subtab, and create your own charcter. See
-Neuro.yaml as an example and reference. Go to the Session tab and enable the openai extension (and follow instructions
-to actually apply the extension). Go to the Model tab and load the model.
+Start text-generation-webui. If you are using chat mode, go to the Parameters tab, then the Characters subtab, and 
+create your own character. See Neuro.yaml as an example and reference. Go to the Session tab and enable the openai 
+extension (and follow instructions to actually apply the extension). Go to the Model tab and load the model.
 
 In this folder, activate your environment (if you have one) and run `python main.py`. A twitch authentication page will
-appear - allow (or not I guess). At this point, the TTS and STT models will begin to load and will take a while. When
+appear - allow (or not I guess). At this point, the TTS and STT models will begin to load and will take a second. When
 the "SYSTEM READY" message is printed, this project is fully up and running, and you can talk to the AI and hear its
 responses.
 
-Open Vtube Studio and if you have you TTS outputting to a virtual audio cable, select the virtual audio cable output as
+Open Vtube Studio and if you have your TTS outputting to a virtual audio cable, select the virtual audio cable output as
 the microphone, and link the mouth open parameter to the microphone volume parameter. If you have a model with lip sync
 support, you can also set that up instead.
 
@@ -141,8 +145,8 @@ and go live!
 
 This is an experimental, exploratory project created for educational and recreational purposes. I can make no guarantee
 that the LLM will output non-vile responses. Please see the is_filtered() method in llmWrapper.py for details, but the
-only filtered word right now is "turkey" in lowercase purely for debugging purposes. If the LLM outputs unsafe content,
-you may and can get banned from Twitch. You use this software with all assumption of risk. This is not legal advice, see
-LICENSE for the repository license.
+only filtered word right now is "turkey" in lowercase purely for debugging purposes. Configure the blacklist in blacklist.txt. 
+If the LLM outputs unsafe content, you may and can get banned from Twitch. You use this software with all assumption 
+of risk. This is not legal advice, see LICENSE for the repository license.
 
 Any attribution in derivative works is appreciated.

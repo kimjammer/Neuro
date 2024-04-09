@@ -1,7 +1,7 @@
 venv/
 models/
 voices/
-deepspeed-0.11.2+cuda118-cp310-cp310-win_amd64.whl
+deepspeed-0.14.0+cu118-cp311-cp311-win_amd64.whl
 .fleet/
 __pycache__/
 .env

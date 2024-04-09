@@ -1,6 +1,7 @@
-import logging
 import time
 from RealtimeTTS import TextToAudioStream, CoquiEngine
+from constants import *
+
 
 class TTS:
     def __init__(self, signals):
@@ -13,12 +14,11 @@ class TTS:
             use_deepspeed=True,
             voice="./voices/neuro.wav",
             speed=1.1,
-            level=logging.ERROR
         )
         tts_config = {
             'on_audio_stream_start': self.audio_started,
             'on_audio_stream_stop': self.audio_ended,
-            'level': logging.ERROR
+            'output_device_index': OUTPUT_DEVICE_INDEX,
         }
         self.stream = TextToAudioStream(engine, **tts_config)
         self.signals.tts_ready = True

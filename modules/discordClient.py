@@ -1,18 +1,18 @@
 import os
 from dotenv import load_dotenv
 import discord
+from modules.module import Module
 from streamingSink import StreamingSink
 
 
-class DiscordClient:
-    stt = None
-    signals = None
+class DiscordClient(Module):
+    def __init__(self, signals, stt, enabled=True):
+        Module.__init__(self, signals, enabled)
 
-    def __init__(self, signals, stt):
         self.stt = stt
         self.signals = signals
 
-    def run(self):
+    async def run(self):
         bot = discord.Bot()
         connections = {}
 

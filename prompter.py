@@ -1,6 +1,6 @@
-import asyncio
 import time
 from constants import PATIENCE
+
 
 class Prompter:
     def __init__(self, signals, llmWrapper):
@@ -23,7 +23,7 @@ class Prompter:
         # Prompt AI if there are unprocessed chat messages
         if len(self.signals.recentTwitchMessages) > 0:
             return True
-        # Prompt if some amount of seconds have passed without anyone talking
+        # Prompt if some amount of seconds has passed without anyone talking
         if self.timeSinceLastMessage > PATIENCE:
             return True
 

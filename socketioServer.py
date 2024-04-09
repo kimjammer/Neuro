@@ -1,4 +1,3 @@
-import asyncio
 import time
 from aiohttp import web
 import socketio
@@ -8,22 +7,19 @@ from constants import PATIENCE
 
 
 class SocketIOServer:
-    def __init__(self, signals, stt, tts, llmWrapper, prompter, twitchClient):
+    def __init__(self, signals, stt, tts, llmWrapper, prompter, modules=None):
+        if modules is None:
+            modules = {}
         self.signals = signals
         self.stt = stt
         self.tts = tts
         self.llmWrapper = llmWrapper
         self.prompter = prompter
-        self.twitchClient = twitchClient
+        self.modules = modules
 
     def start_server(self):
         print("Starting Socket.io server")
         sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*')
-        # This removes the delay in the socket.io connection for whatever reason
-        # sio.instrument(auth={
-        #     'username': 'admin',
-        #     'password': 'admin',
-        # })
         app = web.Application()
         sio.attach(app)
 
@@ -69,11 +65,13 @@ class SocketIOServer:
 
         @sio.event
         async def disable_twitch(sid):
-            self.twitchClient.API.set_twitch_status(False)
+            if "twitch" in self.modules:
+                self.modules["twitch"].API.set_twitch_status(False)
 
         @sio.event
         async def enable_twitch(sid):
-            self.twitchClient.API.set_twitch_status(True)
+            if "twitch" in self.modules:
+                self.modules["twitch"].API.set_twitch_status(True)
 
         @sio.event
         async def cancel_next_message(sid):
@@ -102,12 +100,15 @@ class SocketIOServer:
             self.signals.human_speaking = self.signals.human_speaking
             self.signals.recentTwitchMessages = self.signals.recentTwitchMessages
             await sio.emit("patience_update", {"crr_time": time.time() - self.signals.last_message_time, "total_time": PATIENCE})
-            await sio.emit('twitch_status', self.twitchClient.API.get_twitch_status())
+
+            if "twitch" in self.modules:
+                await sio.emit('twitch_status', self.modules["twitch"].API.get_twitch_status())
+
             # Collect the enabled status of the llm, tts, stt, and movement and send it to the client
             await sio.emit('LLM_status', self.llmWrapper.API.get_LLM_status())
             await sio.emit('TTS_status', self.tts.API.get_TTS_status())
             await sio.emit('STT_status', self.stt.API.get_STT_status())
-            await sio.emit('movement_status', False) # TODO: Not Implemented
+            await sio.emit('movement_status', False)  # TODO: Not Implemented
 
         @sio.event
         def disconnect(sid):
@@ -120,7 +121,7 @@ class SocketIOServer:
 
                 while not self.signals.sio_queue.empty():
                     event, data = self.signals.sio_queue.get()
-                    #print(f"Sending {event} with {data}")
+                    # print(f"Sending {event} with {data}")
                     await sio.emit(event, data)
                 await sio.sleep(0.1)
 

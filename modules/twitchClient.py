@@ -6,21 +6,36 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from constants import TWITCH_CHANNEL, TWITCH_MAX_MESSAGE_LENGTH
+from modules.module import Module
 
-class TwitchClient:
-    def __init__(self, signals):
-        self.signals = signals
+
+class TwitchClient(Module):
+    def __init__(self, signals, enabled=True):
+        Module.__init__(self, signals, enabled)
+
         self.chat = None
         self.twitch = None
         self.API = self.API(self)
-        self.enabled = True
 
-        self.loop = None
+        self.prompt_injection.priority = 100
 
-    def init_event_loop(self):
-        asyncio.run(self.start_twitch_bot())
+    def get_prompt_injection(self):
+        if len(self.signals.recentTwitchMessages) > 0:
+            output = "\nThese are recent twitch messages:\n"
+            for message in self.signals.recentTwitchMessages:
+                output += message + "\n"
 
-    async def start_twitch_bot(self):
+            # Clear out handled twitch messages
+            self.signals.recentTwitchMessages = []
+
+            output += "Pick the highest quality message with the most potential for an interesting answer and respond to them.\n"
+            print(output)
+            self.prompt_injection.text = output
+        else:
+            self.prompt_injection.text = ""
+        return self.prompt_injection
+
+    async def run(self):
         load_dotenv()
         APP_ID = os.getenv("TWITCH_APP_ID")
         APP_SECRET = os.getenv("TWITCH_SECRET")
@@ -63,6 +78,10 @@ class TwitchClient:
                 await cmd.reply('you did not tell me what to reply with')
             else:
                 await cmd.reply(f'{cmd.user.name}: {cmd.parameter}')
+
+        # Checkpoint to see if the bot is enabled
+        if not self.enabled:
+            return
 
         # set up twitch api instance and add user authentication with some scopes
         twitch = await Twitch(APP_ID, APP_SECRET)

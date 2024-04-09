@@ -1,7 +1,7 @@
 import logging
-import asyncio
 import time
 from RealtimeSTT import AudioToTextRecorder
+from constants import *
 
 
 class STT:
@@ -34,9 +34,9 @@ class STT:
         print("STT Starting")
         recorder_config = {
             'spinner': False,
-            'model': 'tiny.en',
             'language': 'en',
             'use_microphone': True,
+            'input_device_index': INPUT_DEVICE_INDEX,
             'silero_sensitivity': 0.6,
             'silero_use_onnx': True,
             'post_speech_silence_duration': 0.2,
@@ -64,7 +64,7 @@ class STT:
             self.outer = outer
 
         def set_STT_status(self, status):
-            self.outer.enabled = True
+            self.outer.enabled = status
             self.outer.signals.sio_queue.put(('STT_status', status))
 
         def get_STT_status(self):

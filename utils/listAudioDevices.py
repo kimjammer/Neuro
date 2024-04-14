@@ -13,7 +13,7 @@ for i in range(0, info.get('deviceCount')):
     if py_audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels') > 0:
         print(str(i) + " " + py_audio.get_device_info_by_host_api_device_index(0, i).get('name'))
 
-# Mics
+# Speakers
 print("Speakers:")
 for i in range(0, info.get('deviceCount')):
     # Check number of input channels

@@ -4,6 +4,8 @@ import sys
 import time
 import threading
 import asyncio
+
+from modules.audioPlayer import AudioPlayer
 # Class Imports
 from signals import Signals
 from prompter import Prompter
@@ -48,6 +50,8 @@ async def main():
     # modules['discord'] = DiscordClient(signals, stt, enabled=False)
     # Create Twitch bot
     modules['twitch'] = TwitchClient(signals, enabled=False)
+    # Create audio player
+    modules['audio_player'] = AudioPlayer(signals, enabled=False)
 
     # Create Socket.io server
     sio = SocketIOServer(signals, stt, tts, llm_wrapper, prompter, modules=modules)

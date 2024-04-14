@@ -91,6 +91,30 @@ class SocketIOServer:
             self.signals.history.append({"role": "user", "content": message})
             self.signals.new_message = True
 
+        @sio.event
+        async def nuke_history(sid):
+            self.signals.history = []
+
+        @sio.event
+        async def play_audio(sid, file_name):
+            if "audio_player" in self.modules:
+                self.modules["audio_player"].API.play_audio(file_name)
+
+        @sio.event
+        async def pause_audio(sid):
+            if "audio_player" in self.modules:
+                self.modules["audio_player"].API.pause_audio()
+
+        @sio.event
+        async def resume_audio(sid):
+            if "audio_player" in self.modules:
+                self.modules["audio_player"].API.resume_audio()
+
+        @sio.event
+        async def abort_audio(sid):
+            if "audio_player" in self.modules:
+                self.modules["audio_player"].API.stop_playing()
+
         # When a new client connects, send them the status of everything
         @sio.event
         async def connect(sid, environ):
@@ -103,6 +127,9 @@ class SocketIOServer:
 
             if "twitch" in self.modules:
                 await sio.emit('twitch_status', self.modules["twitch"].API.get_twitch_status())
+
+            if "audio_player" in self.modules:
+                await sio.emit('audio_list', self.modules["audio_player"].API.get_audio_list())
 
             # Collect the enabled status of the llm, tts, stt, and movement and send it to the client
             await sio.emit('LLM_status', self.llmWrapper.API.get_LLM_status())

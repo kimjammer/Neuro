@@ -10,9 +10,8 @@ from constants import OUTPUT_DEVICE_INDEX
 
 class AudioPlayer(Module):
     def __init__(self, signals, enabled=True):
-        Module.__init__(self, signals, enabled)
+        super().__init__(signals, enabled)
 
-        self.signals = signals
         self.play_queue = queue.SimpleQueue()
         self.abort_flag = False
         self.paused = False

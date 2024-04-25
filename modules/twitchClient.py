@@ -11,7 +11,7 @@ from modules.module import Module
 
 class TwitchClient(Module):
     def __init__(self, signals, enabled=True):
-        Module.__init__(self, signals, enabled)
+        super().__init__(signals, enabled)
 
         self.chat = None
         self.twitch = None

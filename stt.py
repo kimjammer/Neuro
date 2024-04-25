@@ -19,7 +19,8 @@ class STT:
         self.signals.history.append({"role": "user", "content": text})
 
         self.signals.last_message_time = time.time()
-        self.signals.new_message = True
+        if not self.signals.AI_speaking:
+            self.signals.new_message = True
 
     def recording_start(self):
         self.signals.human_speaking = True
@@ -39,7 +40,7 @@ class STT:
             'input_device_index': INPUT_DEVICE_INDEX,
             'silero_sensitivity': 0.6,
             'silero_use_onnx': True,
-            'post_speech_silence_duration': 0.2,
+            'post_speech_silence_duration': 0.4,
             'min_length_of_recording': 0,
             'min_gap_between_recordings': 0.2,
             'enable_realtime_transcription': True,
@@ -56,6 +57,7 @@ class STT:
             self.signals.stt_ready = True
             while not self.signals.terminate:
                 if not self.enabled:
+                    time.sleep(0.2)
                     continue
                 recorder.text(self.process_text)
 

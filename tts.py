@@ -37,6 +37,7 @@ class TTS:
 
     def stop(self):
         self.stream.stop()
+        self.signals.AI_speaking = False
 
     def audio_started(self):
         self.signals.AI_speaking = True

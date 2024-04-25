@@ -4,7 +4,6 @@ import sys
 import time
 import threading
 import asyncio
-
 from modules.audioPlayer import AudioPlayer
 # Class Imports
 from signals import Signals

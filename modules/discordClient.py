@@ -7,10 +7,9 @@ from streamingSink import StreamingSink
 
 class DiscordClient(Module):
     def __init__(self, signals, stt, enabled=True):
-        Module.__init__(self, signals, enabled)
+        super().__init__(signals, enabled)
 
         self.stt = stt
-        self.signals = signals
 
     async def run(self):
         bot = discord.Bot()

@@ -1,8 +1,7 @@
 # Neuro
 
 The goal of this project was to recreate Neuro-Sama, but only running on local models on consumer hardware.
-The original version was also created in only 7 days, so it is not exactly very sophisticated. Please expect this
-program to be somewhat jank.
+The original version was also created in only 7 days, so it is not exactly very sophisticated.
 
 ![Screenshot of demo stream](./images/stream.png)
 
@@ -11,12 +10,12 @@ program to be somewhat jank.
 ### LLM
 
 I used [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui)
-running [Mistral 7B Instruct v0.2 GPTQ](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GPTQ) on the
-ExLlamaV2_HF loader with cache_8bit turned on. The openai api extension must be turned on, as this is how we interact
+running [LLAMA 3 8B Instruct GGUF Q5_K_M](https://huggingface.co/NousResearch/Meta-Llama-3-8B-Instruct-GGUF) on the
+llama.cpp loader with n-gpu-layers set to 256 and tensorcores turned on. The openai api extension must be turned on, as this is how we interact
 with the LLM. text-generation-webui and the LLM must be installed and started separately.
 
 Alternatively, you can load any other model into text-generation-webui or modify constants.py to point to any other
-openapi compatible endpoint. Note that this project uses some parameters only on text-generation-webui.
+openapi compatible endpoint. Note that this project uses some parameters not available on the official OpenAI API.
 
 ### STT
 
@@ -91,7 +90,7 @@ installation details of the architecturally significant repositories listed abov
 ### Other Projects/Software
 
 Install [oobabooga/text-generation-webui](https://github.com/oobabooga/text-generation-webui), and download an LLM model
-to use. I used [Mistral 7B Instruct v0.2 GPTQ](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GPTQ).
+to use. I used [Llama 3 8B Instruct GGUF](https://huggingface.co/NousResearch/Meta-Llama-3-8B-Instruct-GGUF).
 
 Install Vtube Studio from Steam. I used the default Hiyori model.
 

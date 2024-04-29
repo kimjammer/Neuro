@@ -19,6 +19,9 @@ TWITCH_MAX_MESSAGE_LENGTH = 300
 # Twitch channel for bot to join
 TWITCH_CHANNEL = "lunasparkai"
 
+# Voice reference file for TTS
+VOICE_REFERENCE = "neuro.wav"
+
 # LLM SPECIFIC SECTION: Below are constants that are specific to the LLM you are using
 
 # The model you are using with completions, to calculate how many tokens the current message is

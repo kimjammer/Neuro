@@ -120,11 +120,12 @@ from [AllTalkTTS](https://github.com/erew123/alltalk_tts?#-deepspeed-installatio
 
 Create an .env file using .env.example as reference. You need your Twitch app id and secret.
 
-Configure constants.py.
+Place a voice reference wav file in the voices directory. It should be 5~30 seconds long. For details see the RealtimeTTS
+repository.
 
-To output the tts to a specific audio device, first run the utils/listAudioDevices.py script, and find the
-speaker that you want (ex: Virtual Audio Cable Input) and note its number. Configure constants.py to use your chosen
-microphone and speaker device.
+Find your desired microphone and speaker device numbers by running utils/listAudioDevices.py and note its number. 
+
+Configure constants.py.
 
 ## Running
 

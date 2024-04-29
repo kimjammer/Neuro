@@ -12,7 +12,7 @@ class TTS:
 
         engine = CoquiEngine(
             use_deepspeed=True,
-            voice="./voices/neuro.wav",
+            voice="./voices/" + VOICE_REFERENCE,
             speed=1.1,
         )
         tts_config = {

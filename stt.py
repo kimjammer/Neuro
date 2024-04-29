@@ -75,4 +75,3 @@ class STT:
         def shutdown(self):
             self.outer.recorder.stop()
             self.outer.recorder.interrupt_stop_event.set()
-            # self.outer.recorder.shutdown()

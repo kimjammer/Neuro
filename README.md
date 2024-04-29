@@ -5,6 +5,14 @@ The original version was also created in only 7 days, so it is not exactly very 
 
 ![Screenshot of demo stream](./images/stream.png)
 
+## Features
+- Realtime STT for natural voice input
+- Realtime TTS for natural voice output
+- Clean frontend/control panel for easy moderation/interaction: [neurofrontend](https://github.com/kimjammer/neurofrontend)
+- Audio File playback (for pre-generated songs/covers created with something like [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
+- Vtuber model control (WIP)
+- Flexible LLM - Load any model into text-generation-webui (tested) or use any openai-compatible endpoint (not tested).
+
 ## Architecture
 
 ### LLM
@@ -34,8 +42,7 @@ generated, so we don't need to wait for transcription to fully finish before sta
 
 Vtuber model control is currently extremely basic. The audio output from the TTS is piped
 into [vtube studio](https://denchisoft.com/) via a virtual audio cable with something
-like [this](https://vb-audio.com/Cable/), and the microphone volume simply controls how open the mouth is. To output the
-TTS to a specific audio device like the virutal audio cable, the RealtimeTTS library needs to be slightly modified. Read
+like [this](https://vb-audio.com/Cable/), and the microphone volume simply controls how open the mouth is. Read
 the Installation Section for more details.
 
 ### Modularization
@@ -78,9 +85,9 @@ CPU: AMD Ryzen 7 7800X3D
 
 RAM: 32GB DDR5
 
-GPU: Nvidia GeForce RTX 4070
+GPU: Nvidia GeForce RTX 4070 (12GB VRAM)
 
-Environment: Windows 11, Python 3.11.9
+Environment: Windows 11, Python 3.11.9, Pytorch 2.2.2, CUDA 11.8
 
 ## Installation
 
@@ -105,18 +112,15 @@ documentation [here](https://pytwitchapi.dev/en/stable/index.html#user-authentic
 
 A virtual environment of some sort is recommended (Python 3.11); this project was developed with venv.
 
-Install requirements.txt
+Install requirements.txt (This is just a pip freeze, so if you're not on windows watch out)
 
-DeepSpeed will probably need to be installed separately, I was using instructions
+DeepSpeed (For TTS) will probably need to be installed separately, I was using instructions
 from [AllTalkTTS](https://github.com/erew123/alltalk_tts?#-deepspeed-installation-options) , and using their 
 [provided wheels](https://github.com/erew123/alltalk_tts/releases/tag/DeepSpeed-14.0).
 
 Create an .env file using .env.example as reference. You need your Twitch app id and secret.
 
-Configure constants.py. Most important: choose your API mode. Using chat mode uses the chat endpoint, and completions
-will use the completions endpoint which is deprecated in most LLM APIs but gives more control over the exact prompt.
-If you are using oobabooga/text-generation-webui, using the completions mode works is recommended, but for other 
-services you may need to switch to chat mode.
+Configure constants.py.
 
 To output the tts to a specific audio device, first run the utils/listAudioDevices.py script, and find the
 speaker that you want (ex: Virtual Audio Cable Input) and note its number. Configure constants.py to use your chosen
@@ -124,9 +128,8 @@ microphone and speaker device.
 
 ## Running
 
-Start text-generation-webui. If you are using chat mode, go to the Parameters tab, then the Characters subtab, and 
-create your own character. See Neuro.yaml as an example and reference. Go to the Session tab and enable the openai 
-extension (and follow instructions to actually apply the extension). Go to the Model tab and load the model.
+Start text-generation-webui. Go to the Session tab and enable the openai extension (and follow instructions to actually
+apply the extension). Go to the Model tab and load the model.
 
 In this folder, activate your environment (if you have one) and run `python main.py`. A twitch authentication page will
 appear - allow (or not I guess). At this point, the TTS and STT models will begin to load and will take a second. When

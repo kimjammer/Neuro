@@ -112,14 +112,16 @@ class LLMWrapper:
             "mode": "instruct",
             "stream": True,
             "max_tokens": 200,
+            "skip_special_tokens": True,  # Necessary for Llama 3
             "custom_token_bans": BANNED_TOKENS,
-            "stop": ["\n"],
+            "stop": STOP_STRINGS,
             "messages": [{
                 "role": "user",
                 "content": self.generate_prompt()
             }]
         }
 
+        # Currently unused
         if "multimodal" in self.modules:
             if self.modules["multimodal"].API.multimodal_now():
                 data["messages"][0] = {
@@ -198,3 +200,5 @@ class LLMWrapper:
 
         def cancel_next(self):
             self.outer.next_cancelled = True
+            # For text-generation-webui: Immediately stop generation
+            requests.post(LLM_ENDPOINT + "/v1/internal/stop-generation", headers={"Content-Type": "application/json"})

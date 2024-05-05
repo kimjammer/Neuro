@@ -24,7 +24,7 @@ VOICE_REFERENCE = "neuro.wav"
 
 # MULTIMODAL SPECIFIC SECTION: Not needed when not using multimodal capabilities
 
-MULTIMODAL_ENDPOINT = "https://stopping-want-latinas-proper.trycloudflare.com"
+MULTIMODAL_ENDPOINT = ""
 
 MULTIMODAL_MODEL = "deepseek-vl"
 
@@ -65,3 +65,6 @@ Luna: Let's get this stream started!
 # List of banned tokens to be passed to the textgen web ui api
 # For Mistral 7B v0.2, token 422 is the "#" token. The LLM was spamming #life #vtuber #funfact etc.
 BANNED_TOKENS = ""
+
+# List of stopping strings. Necessary for Llama 3
+STOP_STRINGS = ["\n", "<|eot_id|>"]

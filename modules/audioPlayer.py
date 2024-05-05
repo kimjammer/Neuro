@@ -17,6 +17,9 @@ class AudioPlayer(Module):
         self.paused = False
         self.API = self.API(self)
 
+        if not self.enabled:
+            return
+
         # Find all audio files in the songs directory
         self.audio_files = []
         for dirpath, dirnames, filenames in os.walk("songs"):
@@ -26,7 +29,7 @@ class AudioPlayer(Module):
                     self.audio_files.append(audio)
 
     async def run(self):
-        while True:
+        while self.enabled:
             # If we are not currently playing audio, unset the abort flag
             self.abort_flag = False
 

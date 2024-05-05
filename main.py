@@ -51,7 +51,7 @@ async def main():
     # Create Twitch bot
     modules['twitch'] = TwitchClient(signals, enabled=False)
     # Create audio player
-    modules['audio_player'] = AudioPlayer(signals, enabled=False)
+    modules['audio_player'] = AudioPlayer(signals, enabled=True)
     # Create Multimodal module (Currently no suitable models have been found/created)
     # modules['multimodal'] = MultiModal(signals, enabled=False)
 

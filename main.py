@@ -4,7 +4,6 @@ import sys
 import time
 import threading
 import asyncio
-from modules.audioPlayer import AudioPlayer
 # Class Imports
 from signals import Signals
 from prompter import Prompter
@@ -12,6 +11,8 @@ from llmWrapper import LLMWrapper
 from stt import STT
 from tts import TTS
 from modules.twitchClient import TwitchClient
+from modules.audioPlayer import AudioPlayer
+# from modules.multimodal import MultiModal
 from socketioServer import SocketIOServer
 
 
@@ -51,6 +52,8 @@ async def main():
     modules['twitch'] = TwitchClient(signals, enabled=False)
     # Create audio player
     modules['audio_player'] = AudioPlayer(signals, enabled=False)
+    # Create Multimodal module (Currently no suitable models have been found/created)
+    # modules['multimodal'] = MultiModal(signals, enabled=False)
 
     # Create Socket.io server
     sio = SocketIOServer(signals, stt, tts, llm_wrapper, prompter, modules=modules)

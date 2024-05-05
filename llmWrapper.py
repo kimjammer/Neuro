@@ -120,7 +120,24 @@ class LLMWrapper:
             }]
         }
 
-        stream_response = requests.post(LLM_ENDPOINT + "/chat/completions", headers=self.headers, json=data,
+        if "multimodal" in self.modules:
+            if self.modules["multimodal"].API.multimodal_now():
+                data["messages"][0] = {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "data": data["messages"][0]["content"]
+                        },
+                        {
+                            "type": "image_url",
+                            # OpenAI uses "url", "image_url" is for lmdeploy
+                            "image_url": f"data:image/jpeg;base64,{self.modules['multimodal'].API.screen_shot()}"
+                        }
+                    ]
+                }
+
+        stream_response = requests.post(LLM_ENDPOINT + "/v1/chat/completions", headers=self.headers, json=data,
                                         verify=False, stream=True)
         response_stream = sseclient.SSEClient(stream_response)
 

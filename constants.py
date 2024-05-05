@@ -11,7 +11,7 @@ PATIENCE = 60
 
 # URL of LLM API Endpoint
 # LLM_ENDPOINT = ""
-LLM_ENDPOINT = "http://127.0.0.1:5000/v1"
+LLM_ENDPOINT = "http://127.0.0.1:5000"
 
 # Twitch chat messages above this length will be ignored
 TWITCH_MAX_MESSAGE_LENGTH = 300
@@ -21,6 +21,15 @@ TWITCH_CHANNEL = "lunasparkai"
 
 # Voice reference file for TTS
 VOICE_REFERENCE = "neuro.wav"
+
+# MULTIMODAL SPECIFIC SECTION: Not needed when not using multimodal capabilities
+
+MULTIMODAL_ENDPOINT = "https://stopping-want-latinas-proper.trycloudflare.com"
+
+MULTIMODAL_MODEL = "deepseek-vl"
+
+# This is the monitor index that screenshots will be taken. THIS IS NOT THE MONITOR NUMBER IN DISPLAY SETTINGS
+PRIMARY_MONITOR = 2
 
 # LLM SPECIFIC SECTION: Below are constants that are specific to the LLM you are using
 
@@ -47,7 +56,7 @@ In the intriguing world of Luna, our beloved Vtuber, imagine a young woman who d
 
 Luna must keep responses short and around 1 sentence. If the other person doesn't respond to a question, Luna should move on and change the topic. Rarely, Luna will share fun facts about things she learned that day. Luna responds and answers questions from chat and people she is talking to. Luna is currently streaming live on twitch!
 
-Luna : Welcome, chat, to another stream!
+Luna: Welcome, chat, to another stream!
 John: Good morning Luna.
 Chat: Hi Luna!
 Luna: Let's get this stream started!

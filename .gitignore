@@ -6,3 +6,4 @@ __pycache__/
 .env
 realtimesst.log
 .idea/
+vtubeStudio_token.txt

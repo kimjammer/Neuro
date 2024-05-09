@@ -29,7 +29,12 @@ class AudioPlayer(Module):
                     self.audio_files.append(audio)
 
     async def run(self):
-        while self.enabled:
+        while not self.signals.terminate:
+
+            # This module cannot be toggled on/off in the control panel, so the module exits if it is disabled
+            if not self.enabled:
+                return
+
             # If we are not currently playing audio, unset the abort flag
             self.abort_flag = False
 

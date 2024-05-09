@@ -12,6 +12,7 @@ from stt import STT
 from tts import TTS
 from modules.twitchClient import TwitchClient
 from modules.audioPlayer import AudioPlayer
+from modules.vtubeStudio import VtubeStudio
 # from modules.multimodal import MultiModal
 from socketioServer import SocketIOServer
 
@@ -43,6 +44,7 @@ async def main():
     prompter = Prompter(signals, llm_wrapper)
 
     # MODULES
+    # Modules that start disabled CANNOT be enabled while the program is running.
     modules = {}
     module_threads = {}
 
@@ -52,6 +54,8 @@ async def main():
     modules['twitch'] = TwitchClient(signals, enabled=False)
     # Create audio player
     modules['audio_player'] = AudioPlayer(signals, enabled=True)
+    # Create Vtube Studio plugin
+    modules['vtube_studio'] = VtubeStudio(signals, enabled=True)
     # Create Multimodal module (Currently no suitable models have been found/created)
     # modules['multimodal'] = MultiModal(signals, enabled=False)
 
@@ -78,6 +82,11 @@ async def main():
     print("TERMINATING ======================")
 
     # Wait for child threads to exit before exiting main thread
+
+    # Wait for all modules to finish
+    for module_thread in module_threads.values():
+        module_thread.join()
+
     sio_thread.join()
     print("SIO EXITED ======================")
     prompter_thread.join()
@@ -85,10 +94,7 @@ async def main():
     # stt_thread.join()
     # print("STT EXITED ======================")
 
-    # Wait for all modules to finish
-    for module_thread in module_threads.values():
-        module_thread.join()
-
+    print("All threads exited, shutdown complete")
     sys.exit(0)
 
 if __name__ == '__main__':

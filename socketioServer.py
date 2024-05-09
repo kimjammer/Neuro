@@ -57,11 +57,33 @@ class SocketIOServer:
 
         @sio.event
         async def disable_movement(sid):
-            print("Disable Movement: Not implemented")
+            if "vtube_studio" in self.modules:
+                self.modules["vtube_studio"].API.set_movement_status(False)
 
         @sio.event
         async def enable_movement(sid):
-            print("Enable Movement: Not implemented")
+            if "vtube_studio" in self.modules:
+                self.modules["vtube_studio"].API.set_movement_status(True)
+
+        @sio.event
+        async def get_hotkeys(sid):
+            if "vtube_studio" in self.modules:
+                self.modules["vtube_studio"].API.get_hotkeys()
+
+        @sio.event
+        async def send_hotkey(sid, hotkey):
+            if "vtube_studio" in self.modules:
+                self.modules["vtube_studio"].API.send_hotkey(hotkey)
+
+        @sio.event
+        async def trigger_prop(sid, prop_action):
+            if "vtube_studio" in self.modules:
+                self.modules["vtube_studio"].API.trigger_prop(prop_action)
+
+        @sio.event
+        async def move_model(sid, mode):
+            if "vtube_studio" in self.modules:
+                self.modules["vtube_studio"].API.move_model(mode)
 
         @sio.event
         async def disable_twitch(sid):
@@ -131,11 +153,13 @@ class SocketIOServer:
             if "audio_player" in self.modules:
                 await sio.emit('audio_list', self.modules["audio_player"].API.get_audio_list())
 
+            if "vtube_studio" in self.modules:
+                await sio.emit('movement_status', self.modules["vtube_studio"].API.get_movement_status())
+
             # Collect the enabled status of the llm, tts, stt, and movement and send it to the client
             await sio.emit('LLM_status', self.llmWrapper.API.get_LLM_status())
             await sio.emit('TTS_status', self.tts.API.get_TTS_status())
             await sio.emit('STT_status', self.stt.API.get_STT_status())
-            await sio.emit('movement_status', False)  # TODO: Not Implemented
 
         @sio.event
         def disconnect(sid):

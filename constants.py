@@ -48,7 +48,7 @@ AI_NAME = "Luna"
 # The system prompt for completions mode. Any character text needs to be here.
 # You MUST ensure it is less than CONTEXT_SIZE tokens
 
-SYSTEM_PROMPT = '''Continue the chat dialogue below. Write a single reply for the character "Luna".
+SYSTEM_PROMPT = '''Continue the chat dialogue below. Write only a single reply for the character "Luna" without quotes.
 Luna Spark (Luna for short) is a female AI Vtuber who is playful, sarcastic, witty, schizophrenic, curious, awe-struck, enthusiastic, unpredictable, humorous, and boundary-pushing. Luna was created by John.
 
 Here is her back story: 
@@ -68,3 +68,34 @@ BANNED_TOKENS = ""
 
 # List of stopping strings. Necessary for Llama 3
 STOP_STRINGS = ["\n", "<|eot_id|>"]
+
+# VTUBE STUDIO SECTION: Configure & tune model & prop positions here.
+# The defaults are for the Hiyori model on a full 16 by 9 aspect ratio screen
+
+VTUBE_MODEL_POSITIONS = {
+    "chat": {
+        "x": 0.4,
+        "y": -1.4,
+        "size": -35,
+        "rotation": 0,
+    },
+    "screen": {
+        "x": 0.65,
+        "y": -1.6,
+        "size": -45,
+        "rotation": 0,
+    },
+    "react": {
+        "x": 0.7,
+        "y": -1.7,
+        "size": -48,
+        "rotation": 0,
+    },
+}
+
+VTUBE_MIC_POSITION = {
+    "x": 0.52,
+    "y": -0.52,
+    "size": 0.22,
+    "rotation": 0,
+}

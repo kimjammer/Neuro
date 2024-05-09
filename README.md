@@ -10,7 +10,7 @@ The original version was also created in only 7 days, so it is not exactly very 
 - Realtime TTS for natural voice output
 - Clean frontend/control panel for easy moderation/interaction: [neurofrontend](https://github.com/kimjammer/neurofrontend)
 - Audio File playback (for pre-generated songs/covers created with something like [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
-- Vtuber model control (WIP)
+- Vtube Studio Plugin & Model/Prop control
 - Flexible LLM - Load any model into text-generation-webui (tested) or use any openai-compatible endpoint (not tested).
 
 ## Architecture

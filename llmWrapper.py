@@ -19,6 +19,8 @@ class LLMWrapper:
         self.API = self.API(self)
         if modules is None:
             self.modules = {}
+        else:
+            self.modules = modules
 
         self.headers = {"Content-Type": "application/json"}
 
@@ -70,7 +72,6 @@ class LLMWrapper:
                 message["content"] = AI_NAME + ": " + message["content"] + "\n"
 
         while True:
-            print(messages)
             chat_section = ""
             for message in messages:
                 chat_section += message["content"]

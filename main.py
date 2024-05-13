@@ -34,24 +34,24 @@ async def main():
     # Singleton object that every module will be able to read/write to
     signals = Signals()
 
-    # Create STT
-    stt = STT(signals)
-    # Create TTS
-    tts = TTS(signals)
-    # Create LLMController
-    llm_wrapper = LLMWrapper(signals, tts)
-    # Create Prompter
-    prompter = Prompter(signals, llm_wrapper)
-
     # MODULES
     # Modules that start disabled CANNOT be enabled while the program is running.
     modules = {}
     module_threads = {}
 
+    # Create STT
+    stt = STT(signals)
+    # Create TTS
+    tts = TTS(signals)
+    # Create LLMController
+    llm_wrapper = LLMWrapper(signals, tts, modules)
+    # Create Prompter
+    prompter = Prompter(signals, llm_wrapper)
+
     # Create Discord bot
     # modules['discord'] = DiscordClient(signals, stt, enabled=False)
     # Create Twitch bot
-    modules['twitch'] = TwitchClient(signals, enabled=False)
+    modules['twitch'] = TwitchClient(signals, enabled=True)
     # Create audio player
     modules['audio_player'] = AudioPlayer(signals, enabled=True)
     # Create Vtube Studio plugin

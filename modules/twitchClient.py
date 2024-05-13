@@ -29,7 +29,6 @@ class TwitchClient(Module):
             self.signals.recentTwitchMessages = []
 
             output += "Pick the highest quality message with the most potential for an interesting answer and respond to them.\n"
-            print(output)
             self.prompt_injection.text = output
         else:
             self.prompt_injection.text = ""

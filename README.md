@@ -12,6 +12,8 @@ The original version was also created in only 7 days, so it is not exactly very 
 - Audio File playback (for pre-generated songs/covers created with something like [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
 - Vtube Studio Plugin & Model/Prop control
 - Flexible LLM - Load any model into text-generation-webui (tested) or use any openai-compatible endpoint (not tested).
+- Memory - Long-term (persists across restarts) memories can be manually added, but they will also be 
+automatically generated as the AI talks. (See memories/readme.md for details)
 
 ## Architecture
 

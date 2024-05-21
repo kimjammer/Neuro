@@ -7,3 +7,5 @@ __pycache__/
 realtimesst.log
 .idea/
 vtubeStudio_token.txt
+memories.json
+chroma.db/

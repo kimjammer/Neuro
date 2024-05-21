@@ -1,0 +1,11 @@
+{
+  "memories": [
+    {
+      "id": "favoritefood",
+      "document": "Luna's favorite food is mango smoothies.",
+      "metadata": {
+        "type": "long-term"
+      }
+    }
+  ]
+}

@@ -137,6 +137,45 @@ class SocketIOServer:
             if "audio_player" in self.modules:
                 self.modules["audio_player"].API.stop_playing()
 
+        @sio.event
+        async def set_custom_prompt(sid, data):
+            if "custom_prompt" in self.modules:
+                self.modules["custom_prompt"].API.set_prompt(data["prompt"], data["priority"])
+                await sio.emit("get_custom_prompt", self.modules["custom_prompt"].API.get_prompt())
+
+        @sio.event
+        async def clear_short_term(sid):
+            if "memory" in self.modules:
+                self.modules["memory"].API.clear_short_term()
+                await sio.emit("get_memories", self.modules["memory"].API.get_memories())
+
+        @sio.event
+        async def import_json(sid):
+            if "memory" in self.modules:
+                self.modules["memory"].API.import_json()
+
+        @sio.event
+        async def export_json(sid):
+            if "memory" in self.modules:
+                self.modules["memory"].API.export_json()
+
+        @sio.event
+        async def delete_memory(sid, data):
+            if "memory" in self.modules:
+                self.modules["memory"].API.delete_memory(data)
+                await sio.emit("get_memories", self.modules["memory"].API.get_memories())
+
+        @sio.event
+        async def get_memories(sid, data):
+            if "memory" in self.modules:
+                await sio.emit("get_memories", self.modules["memory"].API.get_memories(data))
+
+        @sio.event
+        async def create_memory(sid, data):
+            if "memory" in self.modules:
+                self.modules["memory"].API.create_memory(data)
+                await sio.emit("get_memories", self.modules["memory"].API.get_memories())
+
         # When a new client connects, send them the status of everything
         @sio.event
         async def connect(sid, environ):
@@ -149,12 +188,12 @@ class SocketIOServer:
 
             if "twitch" in self.modules:
                 await sio.emit('twitch_status', self.modules["twitch"].API.get_twitch_status())
-
             if "audio_player" in self.modules:
                 await sio.emit('audio_list', self.modules["audio_player"].API.get_audio_list())
-
             if "vtube_studio" in self.modules:
                 await sio.emit('movement_status', self.modules["vtube_studio"].API.get_movement_status())
+            if "custom_prompt" in self.modules:
+                await sio.emit('get_custom_prompt', self.modules["custom_prompt"].API.get_prompt())
 
             # Collect the enabled status of the llm, tts, stt, and movement and send it to the client
             await sio.emit('LLM_status', self.llmWrapper.API.get_LLM_status())

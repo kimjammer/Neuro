@@ -4,6 +4,7 @@ import sys
 import time
 import threading
 import asyncio
+
 # Class Imports
 from signals import Signals
 from prompter import Prompter
@@ -14,6 +15,8 @@ from modules.twitchClient import TwitchClient
 from modules.audioPlayer import AudioPlayer
 from modules.vtubeStudio import VtubeStudio
 # from modules.multimodal import MultiModal
+from modules.customPrompt import CustomPrompt
+from modules.memory import Memory
 from socketioServer import SocketIOServer
 
 
@@ -51,13 +54,17 @@ async def main():
     # Create Discord bot
     # modules['discord'] = DiscordClient(signals, stt, enabled=False)
     # Create Twitch bot
-    modules['twitch'] = TwitchClient(signals, enabled=True)
+    modules['twitch'] = TwitchClient(signals, enabled=False)
     # Create audio player
     modules['audio_player'] = AudioPlayer(signals, enabled=True)
     # Create Vtube Studio plugin
-    modules['vtube_studio'] = VtubeStudio(signals, enabled=True)
+    modules['vtube_studio'] = VtubeStudio(signals, enabled=False)
     # Create Multimodal module (Currently no suitable models have been found/created)
     # modules['multimodal'] = MultiModal(signals, enabled=False)
+    # Create Custom Prompt module
+    modules['custom_prompt'] = CustomPrompt(signals, enabled=True)
+    # Create Memory module
+    modules['memory'] = Memory(signals, enabled=True)
 
     # Create Socket.io server
     sio = SocketIOServer(signals, stt, tts, llm_wrapper, prompter, modules=modules)

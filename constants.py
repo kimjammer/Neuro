@@ -33,7 +33,7 @@ PRIMARY_MONITOR = 2
 
 # LLM SPECIFIC SECTION: Below are constants that are specific to the LLM you are using
 
-# The model you are using with completions, to calculate how many tokens the current message is
+# The model you are using, to calculate how many tokens the current message is
 MODEL = "meta-llama/Meta-Llama-3-8B"
 
 # Context size (maximum number of tokens in the prompt) Will target upto 90% usage of this limit
@@ -45,7 +45,7 @@ HOST_NAME = "John"
 # This is the AI's name
 AI_NAME = "Luna"
 
-# The system prompt for completions mode. Any character text needs to be here.
+# The system prompt. Any character text needs to be here.
 # You MUST ensure it is less than CONTEXT_SIZE tokens
 
 SYSTEM_PROMPT = '''Continue the chat dialogue below. Write only a single reply for the character "Luna" without quotes.
@@ -68,6 +68,10 @@ BANNED_TOKENS = ""
 
 # List of stopping strings. Necessary for Llama 3
 STOP_STRINGS = ["\n", "<|eot_id|>"]
+
+# MEMORY SECTION: Constants relevant to forming new memories
+
+MEMORY_PROMPT = "\nGiven only the information above, what are 3 most salient high level questions we can answer about the subjects in the conversation? Separate each question and answer pair with \"{qa}\", and only output the question and answer, no explanations."
 
 # VTUBE STUDIO SECTION: Configure & tune model & prop positions here.
 # The defaults are for the Hiyori model on a full 16 by 9 aspect ratio screen

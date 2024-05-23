@@ -73,6 +73,12 @@ STOP_STRINGS = ["\n", "<|eot_id|>"]
 
 MEMORY_PROMPT = "\nGiven only the information above, what are 3 most salient high level questions we can answer about the subjects in the conversation? Separate each question and answer pair with \"{qa}\", and only output the question and answer, no explanations."
 
+# How many messages in the history to include for querying the database.
+MEMORY_QUERY_MESSAGE_COUNT = 5
+
+# How many memories to recall and insert into context
+MEMORY_RECALL_COUNT = 5
+
 # VTUBE STUDIO SECTION: Configure & tune model & prop positions here.
 # The defaults are for the Hiyori model on a full 16 by 9 aspect ratio screen
 

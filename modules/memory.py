@@ -27,6 +27,27 @@ class Memory(Module):
             self.API.import_json(path="./memories/memoryinit.json")
 
     def get_prompt_injection(self):
+        # Use recent messages and twitch messages to query the database for related memories
+        query = ""
+
+        for message in self.signals.recentTwitchMessages:
+            query += message + "\n"
+
+        for message in self.signals.history[-MEMORY_QUERY_MESSAGE_COUNT:]:
+            if message["role"] == "user" and message["content"] != "":
+                query += HOST_NAME + ": " + message["content"] + "\n"
+            elif message["role"] == "assistant" and message["content"] != "":
+                query += AI_NAME + ": " + message["content"] + "\n"
+
+        memories = self.collection.query(query_texts=query, n_results=MEMORY_RECALL_COUNT)
+
+        # Generate injection for LLM prompt
+
+        self.prompt_injection.text = f"{AI_NAME} knows these things:\n"
+        for i in range(len(memories["ids"][0])):
+            self.prompt_injection.text += memories['documents'][0][i] + "\n"
+        self.prompt_injection.text += "End of knowledge section\n"
+
         return self.prompt_injection
 
     async def run(self):
@@ -35,6 +56,9 @@ class Memory(Module):
         # This is a technique called reflection. You essentially ask the AI what information is important in the recent
         # conversation, and it is converted into a memory so that it can be recalled later.
         while not self.signals.terminate:
+            if self.processed_count > len(self.signals.history):
+                self.processed_count = 0
+
             if len(self.signals.history) - self.processed_count >= 20:
                 print("MEMORY: Generating new memories")
 
@@ -71,7 +95,9 @@ class Memory(Module):
                 for memory in raw_memories.split("{qa}"):
                     memory = memory.strip()
                     if memory != "":
-                        self.collection.upsert(uuid.uuid4(), documents=memory, metadatas={"type": "short-term"})
+                        self.collection.upsert([str(uuid.uuid4())], documents=[memory], metadatas=[{"type": "short-term"}])
+
+                self.processed_count = len(self.signals.history)
 
             await asyncio.sleep(5)
 

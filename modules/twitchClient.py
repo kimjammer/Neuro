@@ -17,7 +17,7 @@ class TwitchClient(Module):
         self.twitch = None
         self.API = self.API(self)
 
-        self.prompt_injection.priority = 100
+        self.prompt_injection.priority = 150
 
     def get_prompt_injection(self):
         if len(self.signals.recentTwitchMessages) > 0:
@@ -25,14 +25,15 @@ class TwitchClient(Module):
             for message in self.signals.recentTwitchMessages:
                 output += message + "\n"
 
-            # Clear out handled twitch messages
-            self.signals.recentTwitchMessages = []
-
             output += "Pick the highest quality message with the most potential for an interesting answer and respond to them.\n"
             self.prompt_injection.text = output
         else:
             self.prompt_injection.text = ""
         return self.prompt_injection
+
+    def cleanup(self):
+        # Clear out handled twitch messages
+        self.signals.recentTwitchMessages = []
 
     async def run(self):
         load_dotenv()

@@ -37,7 +37,7 @@ class LLMWrapper:
     # Basic filter to check if a message contains a word in the blacklist
     def is_filtered(self, text):
         # Filter messages with words in blacklist
-        if any(bad_word.lower() in text.lower() for bad_word in self.blacklist):
+        if any(bad_word.lower() in text.lower().split() for bad_word in self.blacklist):
             return True
         else:
             return False
@@ -50,6 +50,10 @@ class LLMWrapper:
         # Gather all injections from all modules
         for module in self.modules.values():
             injections.append(module.get_prompt_injection())
+
+        # Let all modules clean up once the prompt injection has been fetched from all modules
+        for module in self.modules.values():
+            module.cleanup()
 
         # Sort injections by priority
         injections = sorted(injections, key=lambda x: x.priority)
@@ -78,7 +82,7 @@ class LLMWrapper:
 
             generation_prompt = AI_NAME + ": "
 
-            base_injections = [Injection(SYSTEM_PROMPT, 10), Injection(chat_section, 50)]
+            base_injections = [Injection(SYSTEM_PROMPT, 10), Injection(chat_section, 100)]
             full_prompt = self.assemble_injections(base_injections) + generation_prompt
             wrapper = [{"role": "user", "content": full_prompt}]
 

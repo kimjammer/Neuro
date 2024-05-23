@@ -140,7 +140,7 @@ class SocketIOServer:
         @sio.event
         async def set_custom_prompt(sid, data):
             if "custom_prompt" in self.modules:
-                self.modules["custom_prompt"].API.set_prompt(data["prompt"], data["priority"])
+                self.modules["custom_prompt"].API.set_prompt(data["prompt"], priority=int(data["priority"]))
                 await sio.emit("get_custom_prompt", self.modules["custom_prompt"].API.get_prompt())
 
         @sio.event

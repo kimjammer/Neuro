@@ -22,5 +22,9 @@ class Module:
     def get_prompt_injection(self):
         return self.prompt_injection
 
+    # Function that is called after all modules have provided their injections
+    def cleanup(self):
+        pass
+
     async def run(self):
         pass

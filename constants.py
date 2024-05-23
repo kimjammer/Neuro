@@ -1,10 +1,13 @@
 # This file holds various constants used in the program
+# Variables marked with #UNIQUE# will be unique to your setup and NEED to be changed or the program will not work correctly.
 
 # CORE SECTION: All constants in this section are necessary
 
+# Microphone/Speaker device indices
 # Use utils/listAudioDevices.py to find the correct device ID
+#UNIQUE#
 INPUT_DEVICE_INDEX = 1
-OUTPUT_DEVICE_INDEX = 12
+OUTPUT_DEVICE_INDEX = 7
 
 # How many seconds to wait before prompting AI
 PATIENCE = 60
@@ -17,9 +20,11 @@ LLM_ENDPOINT = "http://127.0.0.1:5000"
 TWITCH_MAX_MESSAGE_LENGTH = 300
 
 # Twitch channel for bot to join
+#UNIQUE#
 TWITCH_CHANNEL = "lunasparkai"
 
 # Voice reference file for TTS
+#UNIQUE#
 VOICE_REFERENCE = "neuro.wav"
 
 # MULTIMODAL SPECIFIC SECTION: Not needed when not using multimodal capabilities
@@ -34,12 +39,14 @@ PRIMARY_MONITOR = 2
 # LLM SPECIFIC SECTION: Below are constants that are specific to the LLM you are using
 
 # The model you are using, to calculate how many tokens the current message is
+# Ensure this is correct! Used for token count estimation
 MODEL = "meta-llama/Meta-Llama-3-8B"
 
 # Context size (maximum number of tokens in the prompt) Will target upto 90% usage of this limit
 CONTEXT_SIZE = 8192
 
 # This is your name
+#UNIQUE#
 HOST_NAME = "John"
 
 # This is the AI's name

@@ -46,7 +46,7 @@ async def main():
     stt = STT(signals)
     # Create TTS
     tts = TTS(signals)
-    # Create LLMController
+    # Create LLMWrapper
     llm_wrapper = LLMWrapper(signals, tts, modules)
     # Create Prompter
     prompter = Prompter(signals, llm_wrapper)

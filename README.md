@@ -12,7 +12,7 @@ The original version was also created in only 7 days, so it is not exactly very 
 - Audio File playback (for pre-generated songs/covers created with something like [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
 - Vtube Studio Plugin & Model/Prop control
 - Flexible LLM - Load any model into text-generation-webui (tested) or use any openai-compatible endpoint (not tested).
-- Memory - Long-term (persists across restarts) memories can be manually added, but they will also be 
+- Memory/RAG - Long-term (persists across restarts) memories can be manually added, but they will also be 
 automatically generated as the AI talks. (See memories/readme.md for details)
 
 ## Architecture
@@ -112,20 +112,23 @@ documentation [here](https://pytwitchapi.dev/en/stable/index.html#user-authentic
 
 ### This Project
 
-A virtual environment of some sort is recommended (Python 3.11); this project was developed with venv.
+A virtual environment of some sort is recommended (Python 3.11 required); this project was developed with venv.
 
-Install requirements.txt (This is just a pip freeze, so if you're not on windows watch out)
+Install the CUDA 11.8 version of pytorch 2.2.2 first.
 
-DeepSpeed (For TTS) will probably need to be installed separately, I was using instructions
-from [AllTalkTTS](https://github.com/erew123/alltalk_tts?#-deepspeed-installation-options) , and using their 
+Then install requirements.txt (This is just a pip freeze, so if you're not on Windows watch out)
+
+Finally, DeepSpeed (For TTS) will need to be installed separately. I was using instructions
+from [AllTalkTTS](https://github.com/erew123/alltalk_tts?#-deepspeed-installation-options), and using their 
 [provided wheels](https://github.com/erew123/alltalk_tts/releases/tag/DeepSpeed-14.0).
 
-Create an .env file using .env.example as reference. You need your Twitch app id and secret.
+Create an .env file using .env.example as reference. You need your Twitch app id and secret, along with your
+Hugginface token if you use a gated model (like Llama 3).
 
 Place a voice reference wav file in the voices directory. It should be 5~30 seconds long. For details see the RealtimeTTS
 repository.
 
-Find your desired microphone and speaker device numbers by running utils/listAudioDevices.py and note its number. 
+Find your desired microphone and speaker device numbers by running utils/listAudioDevices.py and note its numbers. 
 
 Configure constants.py.
 

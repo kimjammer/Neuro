@@ -5,7 +5,7 @@ will be automatically injected into the prompt. Memories will also persist acros
 the frontend or the database is deleted.
 
 The automatically generated memories are based off of 
-("Generative Agents: Interactive Simulacra of Human Behavior")[https://arxiv.org/abs/2304.03442]. Essentially, 
+[Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/abs/2304.03442). Essentially, 
 every handful of messages, the LLM will be prompted to review the recent messages and come up with the 3 most high level
 questions that encapsulate the conversation and also provide the answer. These question/answer pairs are then each
 stored as a (short-term) memory. These short-term memories will persists across restarts unless deleted.

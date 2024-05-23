@@ -42,10 +42,11 @@ generated, so we don't need to wait for transcription to fully finish before sta
 
 ### Vtuber model control
 
-Vtuber model control is currently extremely basic. The audio output from the TTS is piped
+Vtuber model control is currently basic. The audio output from the TTS is piped
 into [vtube studio](https://denchisoft.com/) via a virtual audio cable with something
-like [this](https://vb-audio.com/Cable/), and the microphone volume simply controls how open the mouth is. Read
-the Installation Section for more details.
+like [this](https://vb-audio.com/Cable/), and Vtube Studio handles the lip sync. Read the Installation Section for more
+details. You can also trigger hotkeys or preprogrammed animations (microphone slide in/out) from the frontend. There
+are also buttons for moving/resizing the model into preprogrammed positions to transition between scenes. 
 
 ### Modularization
 
@@ -123,7 +124,7 @@ from [AllTalkTTS](https://github.com/erew123/alltalk_tts?#-deepspeed-installatio
 [provided wheels](https://github.com/erew123/alltalk_tts/releases/tag/DeepSpeed-14.0).
 
 Create an .env file using .env.example as reference. You need your Twitch app id and secret, along with your
-Hugginface token if you use a gated model (like Llama 3).
+Huggingface token if you use a gated model (like Llama 3).
 
 Place a voice reference wav file in the voices directory. It should be 5~30 seconds long. For details see the RealtimeTTS
 repository.

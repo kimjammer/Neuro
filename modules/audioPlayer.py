@@ -39,7 +39,6 @@ class AudioPlayer(Module):
             self.abort_flag = False
 
             # Check if there are any audio files to play
-
             if self.play_queue.qsize() > 0:
                 file_name = self.play_queue.get()
                 print(file_name)
@@ -61,12 +60,15 @@ class AudioPlayer(Module):
                         # So as not to raise OSError: Device Unavailable should play() be used again
                         try:
                             # break audio into half-second chunks (to allows keyboard interrupts & aborts)
-                            for chunk in make_chunks(audio, 500):
+                            for chunk in make_chunks(audio, 200):
+                                while self.paused:
+                                    if self.abort_flag:
+                                        break
+                                    await asyncio.sleep(0.1)
+
                                 if self.abort_flag:
                                     self.abort_flag = False
                                     break
-                                while self.paused:
-                                    await asyncio.sleep(0.1)
 
                                 stream.write(chunk._data)
 

@@ -185,6 +185,7 @@ class SocketIOServer:
             self.signals.human_speaking = self.signals.human_speaking
             self.signals.recentTwitchMessages = self.signals.recentTwitchMessages
             await sio.emit("patience_update", {"crr_time": time.time() - self.signals.last_message_time, "total_time": PATIENCE})
+            await sio.emit('get_blacklist', self.llmWrapper.API.get_blacklist())
 
             if "twitch" in self.modules:
                 await sio.emit('twitch_status', self.modules["twitch"].API.get_twitch_status())
@@ -192,6 +193,7 @@ class SocketIOServer:
                 await sio.emit('audio_list', self.modules["audio_player"].API.get_audio_list())
             if "vtube_studio" in self.modules:
                 await sio.emit('movement_status', self.modules["vtube_studio"].API.get_movement_status())
+                self.modules["vtube_studio"].API.get_hotkeys()
             if "custom_prompt" in self.modules:
                 await sio.emit('get_custom_prompt', self.modules["custom_prompt"].API.get_prompt())
 

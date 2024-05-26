@@ -143,7 +143,12 @@ class VtubeStudio(Module):
             return
 
         # Connect
-        await self.vts.connect()
+        try:
+            await self.vts.connect()
+        except:
+            print("Failed to connect to Vtube Studio. Disabling Vtube Studio module.")
+            self.enabled = False
+            return
 
         # Authenticate
         try:
@@ -207,13 +212,25 @@ class VtubeStudio(Module):
             return self.outer.enabled
 
         def get_hotkeys(self):
+            if not self.outer.enabled:
+                self.outer.signals.sio_queue.put(("error", "Vtube Studio Module is disabled"))
+                return
             self.outer.queue.put(self.outer.Action("get_hotkeys", None))
 
         def send_hotkey(self, hotkey):
+            if not self.outer.enabled:
+                self.outer.signals.sio_queue.put(("error", "Vtube Studio Module is disabled"))
+                return
             self.outer.queue.put(self.outer.Action("send_hotkey", hotkey))
 
         def trigger_prop(self, prop_action):
+            if not self.outer.enabled:
+                self.outer.signals.sio_queue.put(("error", "Vtube Studio Module is disabled"))
+                return
             self.outer.queue.put(self.outer.Action(prop_action, None))
 
         def move_model(self, mode):
+            if not self.outer.enabled:
+                self.outer.signals.sio_queue.put(("error", "Vtube Studio Module is disabled"))
+                return
             self.outer.queue.put(self.outer.Action("move_model", mode))

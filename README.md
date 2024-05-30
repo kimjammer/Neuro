@@ -115,13 +115,16 @@ documentation [here](https://pytwitchapi.dev/en/stable/index.html#user-authentic
 
 A virtual environment of some sort is recommended (Python 3.11 required); this project was developed with venv.
 
-Install the CUDA 11.8 version of pytorch 2.2.2 first.
+First, install the CUDA 11.8 version of pytorch 2.2.2.
+`pip install torch==2.2.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu118`
 
-Then install requirements.txt (This is just a pip freeze, so if you're not on Windows watch out)
+Install requirements.txt.
 
-Finally, DeepSpeed (For TTS) will need to be installed separately. I was using instructions
+DeepSpeed (For TTS) will need to be installed separately. I was using instructions
 from [AllTalkTTS](https://github.com/erew123/alltalk_tts?#-deepspeed-installation-options), and using their 
 [provided wheels](https://github.com/erew123/alltalk_tts/releases/tag/DeepSpeed-14.0).
+
+If you're having trouble with dependency conflicts, see pipfreeze.txt to see the exact versions I was using.
 
 Create an .env file using .env.example as reference. You need your Twitch app id and secret, along with your
 Huggingface token if you use a gated model (like Llama 3).
@@ -131,7 +134,8 @@ repository.
 
 Find your desired microphone and speaker device numbers by running utils/listAudioDevices.py and note its numbers. 
 
-Configure constants.py.
+Configure constants.py. Make sure to configure every value marked as UNIQUE, these are specific to you and must 
+be changed or confirmed.
 
 ## Running
 

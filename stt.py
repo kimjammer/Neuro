@@ -46,6 +46,7 @@ class STT:
             'enable_realtime_transcription': True,
             'realtime_processing_pause': 0.2,
             'realtime_model_type': 'tiny.en',
+            'compute_type': 'auto',
             'on_recording_start': self.recording_start,
             'on_recording_stop': self.recording_stop,
             'level': logging.ERROR

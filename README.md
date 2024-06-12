@@ -12,9 +12,9 @@ The original version was also created in only 7 days, so it is not exactly very 
 - Audio File playback (for pre-generated songs/covers created with something like [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
 - Vtube Studio Plugin & Model/Prop control
 - Flexible LLM - Load any model into text-generation-webui (tested) or use any openai-compatible endpoint (not tested).
-- Memory/RAG - Long-term (persists across restarts) memories can be manually added, but they will also be 
+- 🌟 Memory/RAG - Long-term (persists across restarts) memories can be manually added, but they will also be 
 automatically generated as the AI talks. (See memories/readme.md for details)
-- Vision/Multimodality - Automatic screenshots and prompting of multimodal models. (See [Neuro-LLM-Server](https://github.com/kimjammer/Neuro-LLM-Server))
+- 🌟 Vision/Multimodality - Automatic screenshots and prompting of multimodal models. (See [Neuro-LLM-Server](https://github.com/kimjammer/Neuro-LLM-Server))
 
 ## Architecture
 
@@ -165,6 +165,13 @@ support, you can also set that up instead.
 
 In OBS (or other streaming software), receive your Vtube Studio feed (on Windows Spout2 is recommended by Vtube Studio),
 and go live!
+
+## Support
+
+Kind words & Ko-fi tips greatly appreciated! If you do/make something with Neuro I would 
+also love to hear about it.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/R5R5NSIV8)
 
 # DISCLAIMER
 

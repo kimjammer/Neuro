@@ -31,10 +31,17 @@ VOICE_REFERENCE = "neuro.wav"
 
 MULTIMODAL_ENDPOINT = ""
 
-MULTIMODAL_MODEL = "deepseek-vl"
+MULTIMODAL_MODEL = "openbmb/MiniCPM-Llama3-V-2_5-int4"
+
+MULTIMODAL_CONTEXT_SIZE = 8192
+
+# This is the multimodal strategy (when to use multimodal/text only llm) that the program will start with.
+# Runtime changes will not be saved here.
+# Valid values are: "always", "never"
+MULTIMODAL_STRATEGY = "always"
 
 # This is the monitor index that screenshots will be taken. THIS IS NOT THE MONITOR NUMBER IN DISPLAY SETTINGS
-PRIMARY_MONITOR = 2
+PRIMARY_MONITOR = 0
 
 # LLM SPECIFIC SECTION: Below are constants that are specific to the LLM you are using
 

@@ -3,9 +3,13 @@ from constants import PATIENCE
 
 
 class Prompter:
-    def __init__(self, signals, llmWrapper):
+    def __init__(self, signals, llms, modules=None):
         self.signals = signals
-        self.llmWrapper = llmWrapper
+        self.llms = llms
+        if modules is None:
+            self.modules = {}
+        else:
+            self.modules = modules
 
         self.system_ready = False
         self.timeSinceLastMessage = 0.0
@@ -27,6 +31,12 @@ class Prompter:
         if self.timeSinceLastMessage > PATIENCE:
             return True
 
+    def chooseLLM(self):
+        if "multimodal" in self.modules and self.modules["multimodal"].API.multimodal_now():
+            return self.llms["image"]
+        else:
+            return self.llms["text"]
+
     def prompt_loop(self):
         print("Prompter loop started")
 
@@ -47,7 +57,8 @@ class Prompter:
             # Decide and prompt LLM
             if self.prompt_now():
                 print("PROMPTING AI")
-                self.llmWrapper.prompt()
+                llmWrapper = self.chooseLLM()
+                llmWrapper.prompt()
                 self.signals.last_message_time = time.time()
 
             # Sleep for 0.1 seconds before checking again.

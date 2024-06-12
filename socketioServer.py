@@ -66,6 +66,16 @@ class SocketIOServer:
                 self.modules["vtube_studio"].API.set_movement_status(True)
 
         @sio.event
+        async def disable_multimodal(sid):
+            if "multimodal" in self.modules:
+                self.modules["multimodal"].API.set_multimodal_status(False)
+
+        @sio.event
+        async def enable_multimodal(sid):
+            if "multimodal" in self.modules:
+                self.modules["multimodal"].API.set_multimodal_status(True)
+
+        @sio.event
         async def get_hotkeys(sid):
             if "vtube_studio" in self.modules:
                 self.modules["vtube_studio"].API.get_hotkeys()
@@ -196,6 +206,8 @@ class SocketIOServer:
                 self.modules["vtube_studio"].API.get_hotkeys()
             if "custom_prompt" in self.modules:
                 await sio.emit('get_custom_prompt', self.modules["custom_prompt"].API.get_prompt())
+            if "multimodal" in self.modules:
+                await sio.emit('multimodal_status', self.modules["multimodal"].API.get_multimodal_status())
 
             # Collect the enabled status of the llm, tts, stt, and movement and send it to the client
             await sio.emit('LLM_status', self.llmWrapper.API.get_LLM_status())

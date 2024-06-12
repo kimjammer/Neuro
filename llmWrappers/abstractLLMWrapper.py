@@ -1,21 +1,19 @@
-import os
 import copy
 import requests
 import sseclient
 import json
 import time
 from dotenv import load_dotenv
-from transformers import AutoTokenizer
 from constants import *
 from modules.injection import Injection
 
 
-class LLMWrapper:
+class AbstractLLMWrapper:
 
-    def __init__(self, signals, tts, modules=None):
+    def __init__(self, signals, tts, llmState, modules=None):
         self.signals = signals
+        self.llmState = llmState
         self.tts = tts
-        self.blacklist = []
         self.API = self.API(self)
         if modules is None:
             self.modules = {}
@@ -24,20 +22,18 @@ class LLMWrapper:
 
         self.headers = {"Content-Type": "application/json"}
 
-        self.enabled = True
-        self.next_cancelled = False
-
-        # Read in blacklist from file
-        with open('blacklist.txt', 'r') as file:
-            self.blacklist = file.read().splitlines()
-
         load_dotenv()
-        self.tokenizer = AutoTokenizer.from_pretrained(MODEL, token=os.getenv("HF_TOKEN"))
+
+        #Below constants must be set by child classes
+        self.SYSTEM_PROMPT = None
+        self.LLM_ENDPOINT = None
+        self.CONTEXT_SIZE = None
+        self.tokenizer = None
 
     # Basic filter to check if a message contains a word in the blacklist
     def is_filtered(self, text):
         # Filter messages with words in blacklist
-        if any(bad_word.lower() in text.lower().split() for bad_word in self.blacklist):
+        if any(bad_word.lower() in text.lower().split() for bad_word in self.llmState.blacklist):
             return True
         else:
             return False
@@ -64,7 +60,6 @@ class LLMWrapper:
             prompt += injection.text
         return prompt
 
-    # This function is only used in completions mode
     def generate_prompt(self):
         messages = copy.deepcopy(self.signals.history)
 
@@ -82,7 +77,7 @@ class LLMWrapper:
 
             generation_prompt = AI_NAME + ": "
 
-            base_injections = [Injection(SYSTEM_PROMPT, 10), Injection(chat_section, 100)]
+            base_injections = [Injection(self.SYSTEM_PROMPT, 10), Injection(chat_section, 100)]
             full_prompt = self.assemble_injections(base_injections) + generation_prompt
             wrapper = [{"role": "user", "content": full_prompt}]
 
@@ -92,7 +87,7 @@ class LLMWrapper:
             # print(prompt_tokens)
 
             # Maximum 90% context size usage before prompting LLM
-            if prompt_tokens < 0.9 * CONTEXT_SIZE:
+            if prompt_tokens < 0.9 * self.CONTEXT_SIZE:
                 self.signals.sio_queue.put(("full_prompt", full_prompt))
                 # print(full_prompt)
                 return full_prompt
@@ -105,53 +100,27 @@ class LLMWrapper:
                 messages.pop(0)
                 print("Prompt too long, removing earliest message")
 
+    def prepare_payload(self):
+        raise NotImplementedError("Must implement prepare_payload in child classes")
+
     def prompt(self):
-        if not self.enabled:
+        if not self.llmState.enabled:
             return
 
         self.signals.AI_thinking = True
         self.signals.new_message = False
         self.signals.sio_queue.put(("reset_next_message", None))
 
-        data = {
-            "mode": "instruct",
-            "stream": True,
-            "max_tokens": 200,
-            "skip_special_tokens": False,  # Necessary for Llama 3
-            "custom_token_bans": BANNED_TOKENS,
-            "stop": STOP_STRINGS,
-            "messages": [{
-                "role": "user",
-                "content": self.generate_prompt()
-            }]
-        }
+        data = self.prepare_payload()
 
-        # Currently unused
-        if "multimodal" in self.modules:
-            if self.modules["multimodal"].API.multimodal_now():
-                data["messages"][0] = {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "data": data["messages"][0]["content"]
-                        },
-                        {
-                            "type": "image_url",
-                            # OpenAI uses "url", "image_url" is for lmdeploy
-                            "image_url": f"data:image/jpeg;base64,{self.modules['multimodal'].API.screen_shot()}"
-                        }
-                    ]
-                }
-
-        stream_response = requests.post(LLM_ENDPOINT + "/v1/chat/completions", headers=self.headers, json=data,
+        stream_response = requests.post(self.LLM_ENDPOINT + "/v1/chat/completions", headers=self.headers, json=data,
                                         verify=False, stream=True)
         response_stream = sseclient.SSEClient(stream_response)
 
         AI_message = ''
         for event in response_stream.events():
             # Check to see if next message was canceled
-            if self.next_cancelled:
+            if self.llmState.next_cancelled:
                 continue
 
             payload = json.loads(event.data)
@@ -159,8 +128,8 @@ class LLMWrapper:
             AI_message += chunk
             self.signals.sio_queue.put(("next_chunk", chunk))
 
-        if self.next_cancelled:
-            self.next_cancelled = False
+        if self.llmState.next_cancelled:
+            self.llmState.next_cancelled = False
             self.signals.sio_queue.put(("reset_next_message", None))
             self.signals.AI_thinking = False
             return
@@ -183,10 +152,10 @@ class LLMWrapper:
             self.outer = outer
 
         def get_blacklist(self):
-            return self.outer.blacklist
+            return self.outer.llmState.blacklist
 
         def set_blacklist(self, new_blacklist):
-            self.outer.blacklist = new_blacklist
+            self.outer.llmState.blacklist = new_blacklist
             with open('blacklist.txt', 'w') as file:
                 for word in new_blacklist:
                     file.write(word + "\n")
@@ -195,15 +164,15 @@ class LLMWrapper:
             self.outer.signals.sio_queue.put(('get_blacklist', new_blacklist))
 
         def set_LLM_status(self, status):
-            self.outer.enabled = status
+            self.outer.llmState.enabled = status
             if status:
                 self.outer.signals.AI_thinking = False
             self.outer.signals.sio_queue.put(('LLM_status', status))
 
         def get_LLM_status(self):
-            return self.outer.enabled
+            return self.outer.llmState.enabled
 
         def cancel_next(self):
-            self.outer.next_cancelled = True
+            self.outer.llmState.next_cancelled = True
             # For text-generation-webui: Immediately stop generation
-            requests.post(LLM_ENDPOINT + "/v1/internal/stop-generation", headers={"Content-Type": "application/json"})
+            requests.post(self.outer.LLM_ENDPOINT + "/v1/internal/stop-generation", headers={"Content-Type": "application/json"})

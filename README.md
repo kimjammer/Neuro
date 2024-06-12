@@ -116,7 +116,7 @@ documentation [here](https://pytwitchapi.dev/en/stable/index.html#user-authentic
 A virtual environment of some sort is recommended (Python 3.11 required); this project was developed with venv.
 
 First, install the CUDA 11.8 version of pytorch 2.2.2.
-`pip install torch==2.2.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu118`
+`pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu118`
 
 Install requirements.txt.
 

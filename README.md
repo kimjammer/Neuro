@@ -14,6 +14,7 @@ The original version was also created in only 7 days, so it is not exactly very 
 - Flexible LLM - Load any model into text-generation-webui (tested) or use any openai-compatible endpoint (not tested).
 - Memory/RAG - Long-term (persists across restarts) memories can be manually added, but they will also be 
 automatically generated as the AI talks. (See memories/readme.md for details)
+- Vision/Multimodality - Automatic screenshots and prompting of multimodal models. (See [Neuro-LLM-Server](https://github.com/kimjammer/Neuro-LLM-Server))
 
 ## Architecture
 
@@ -26,6 +27,14 @@ with the LLM. text-generation-webui and the LLM must be installed and started se
 
 Alternatively, you can load any other model into text-generation-webui or modify constants.py to point to any other
 openapi compatible endpoint. Note that this project uses some parameters not available on the official OpenAI API.
+
+### Multimodal LLM
+
+Like with the text-only LLM, you can use any openai api compatible endpoint (Be careful, many openai-like hosting servers
+are not actually compatible) to access any multimodal model. However, I'm using [MiniCPM-Llama3-V-2_5-int4](https://github.com/OpenBMB/MiniCPM-V) 
+on my custom and extremely jank [Neuro-LLM-Server](https://github.com/kimjammer/Neuro-LLM-Server) to host the model.
+This model has amazing high resolution input, great OCR, and is based on Llama 3 so the output is very similar to the
+text-only mode. The int4 quantized version uses approximately 8GB of VRAM.
 
 ### STT
 
@@ -119,6 +128,9 @@ First, install the CUDA 11.8 version of pytorch 2.2.2.
 `pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu118`
 
 Install requirements.txt.
+
+Use `pip list` to confirm that you still have the 2.2.2+cu118 version of torch and torchaudio still installed. If
+it got overridden, use the first command to install it again.
 
 DeepSpeed (For TTS) will need to be installed separately. I was using instructions
 from [AllTalkTTS](https://github.com/erew123/alltalk_tts?#-deepspeed-installation-options), and using their 

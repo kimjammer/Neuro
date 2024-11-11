@@ -33,14 +33,15 @@ MULTIMODAL_ENDPOINT = ""
 
 MULTIMODAL_MODEL = "openbmb/MiniCPM-Llama3-V-2_5-int4"
 
-MULTIMODAL_CONTEXT_SIZE = 8192
+MULTIMODAL_CONTEXT_SIZE = 1000 #8192 # Trying out 1000 tokens to limit short term memory
 
 # This is the multimodal strategy (when to use multimodal/text only llm) that the program will start with.
 # Runtime changes will not be saved here.
 # Valid values are: "always", "never"
-MULTIMODAL_STRATEGY = "always"
+MULTIMODAL_STRATEGY = "never"
 
 # This is the monitor index that screenshots will be taken. THIS IS NOT THE MONITOR NUMBER IN DISPLAY SETTINGS
+# Monitor 0 is a "virtual" monitor contains all monitor screens.
 PRIMARY_MONITOR = 0
 
 # LLM SPECIFIC SECTION: Below are constants that are specific to the LLM you are using

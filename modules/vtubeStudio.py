@@ -206,7 +206,9 @@ class VtubeStudio(Module):
             self.outer.enabled = status
             self.outer.signals.sio_queue.put(('movement_status', status))
             if status:
-                self.outer.queue.clear()
+                #Clear queue
+                while not self.outer.queue.empty():
+                    self.outer.queue.get()
 
         def get_movement_status(self):
             return self.outer.enabled

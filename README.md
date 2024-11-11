@@ -3,7 +3,10 @@
 The goal of this project was to recreate Neuro-Sama, but only running on local models on consumer hardware.
 The original version was also created in only 7 days, so it is not exactly very sophisticated.
 
+DEMO VIDEO: [Youtube VOD](https://youtu.be/bywM1gyAEM4?si=706o2oialxbPEUBD&t=1073)
+
 ![Screenshot of demo stream](./images/stream.png)
+
 
 ## Features
 - Realtime STT for natural voice input

@@ -151,11 +151,7 @@ class VtubeStudio(Module):
             return
 
         # Authenticate
-        try:
-            await self.vts.read_token()
-        except:
-            await self.vts.request_authenticate_token()  # get token
-            await self.vts.write_token()
+        await self.vts.request_authenticate_token()  # get token
         await self.vts.request_authenticate()  # use token
 
         self.item_list = await self.get_item_list()

@@ -1,5 +1,6 @@
 from modules.module import Module
 from constants import *
+from chromadb.config import Settings
 import chromadb
 import requests
 import json
@@ -19,7 +20,7 @@ class Memory(Module):
 
         self.processed_count = 0
 
-        self.chroma_client = chromadb.PersistentClient(path="./memories/chroma.db")
+        self.chroma_client = chromadb.PersistentClient(path="./memories/chroma.db", settings=Settings(anonymized_telemetry=False))
         self.collection = self.chroma_client.get_or_create_collection(name="neuro_collection")
         print(f"MEMORY: Loaded {self.collection.count()} memories from database.")
         if self.collection.count() == 0:
